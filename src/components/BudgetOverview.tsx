@@ -17,12 +17,12 @@ export default function BudgetOverview({ items }: Props) {
   if (items.length === 0) return null;
 
   return (
-    <div className="bg-white rounded-2xl border border-slate-200">
-      <div className="px-5 py-4 border-b border-slate-100">
-        <h2 className="font-semibold text-slate-900">Ngân Sách Tháng Này</h2>
-        <p className="text-xs text-slate-400 mt-0.5">Theo dõi chi tiêu so với hạn mức</p>
+    <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700">
+      <div className="px-5 py-4 border-b border-slate-100 dark:border-slate-700">
+        <h2 className="font-semibold text-slate-900 dark:text-white">Ngân Sách Tháng Này</h2>
+        <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">Theo dõi chi tiêu so với hạn mức</p>
       </div>
-      <div className="divide-y divide-slate-100">
+      <div className="divide-y divide-slate-100 dark:divide-slate-700">
         {items.map(({ category, spent }) => {
           const limit = category.budget_limit!;
           const pct = Math.min((spent / limit) * 100, 100);
@@ -34,7 +34,7 @@ export default function BudgetOverview({ items }: Props) {
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2">
                   <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: category.color }} />
-                  <span className="text-sm font-medium text-slate-700">{category.name}</span>
+                  <span className="text-sm font-medium text-slate-700 dark:text-slate-200">{category.name}</span>
                   {over && (
                     <span className="flex items-center gap-1 text-xs text-red-500 font-medium">
                       <AlertTriangle className="w-3.5 h-3.5" /> Vượt hạn mức
@@ -51,15 +51,13 @@ export default function BudgetOverview({ items }: Props) {
                     </span>
                   )}
                 </div>
-                <span className={`text-sm font-semibold ${over ? "text-red-600" : "text-slate-700"}`}>
+                <span className={`text-sm font-semibold ${over ? "text-red-600" : "text-slate-700 dark:text-slate-200"}`}>
                   {formatCurrency(spent)} / {formatCurrency(limit)}
                 </span>
               </div>
-              <div className="w-full bg-slate-100 rounded-full h-2">
+              <div className="w-full bg-slate-100 dark:bg-slate-700 rounded-full h-2">
                 <div
-                  className={`h-2 rounded-full transition-all duration-300 ${
-                    over ? "bg-red-500" : warn ? "bg-amber-400" : "bg-green-500"
-                  }`}
+                  className={`h-2 rounded-full transition-all duration-300 ${over ? "bg-red-500" : warn ? "bg-amber-400" : "bg-green-500"}`}
                   style={{ width: `${pct}%` }}
                 />
               </div>
@@ -67,9 +65,9 @@ export default function BudgetOverview({ items }: Props) {
                 {over ? (
                   <p className="text-xs text-red-500">Vượt {formatCurrency(spent - limit)}</p>
                 ) : (
-                  <p className="text-xs text-slate-400">Còn lại {formatCurrency(limit - spent)}</p>
+                  <p className="text-xs text-slate-400 dark:text-slate-500">Còn lại {formatCurrency(limit - spent)}</p>
                 )}
-                <p className="text-xs text-slate-400">{Math.round(pct)}%</p>
+                <p className="text-xs text-slate-400 dark:text-slate-500">{Math.round(pct)}%</p>
               </div>
             </div>
           );

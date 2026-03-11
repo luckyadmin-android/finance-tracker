@@ -65,19 +65,14 @@ export default function CategoriesClient({ initialCategories }: Props) {
       const { data, error: err } = await supabase
         .from("categories")
         .update({ name: form.name.trim(), color: form.color, budget_limit: budgetVal })
-        .eq("id", editing)
-        .select()
-        .single();
-
+        .eq("id", editing).select().single();
       if (err) { setError(err.message); setLoading(false); return; }
       setCategories((prev) => prev.map((c) => (c.id === editing ? (data as Category) : c)));
     } else {
       const { data, error: err } = await supabase
         .from("categories")
         .insert({ name: form.name.trim(), type: form.type, color: form.color, budget_limit: budgetVal })
-        .select()
-        .single();
-
+        .select().single();
       if (err) { setError(err.message); setLoading(false); return; }
       setCategories((prev) => [...prev, data as Category]);
     }
@@ -95,35 +90,35 @@ export default function CategoriesClient({ initialCategories }: Props) {
   }
 
   const CategorySection = ({ title, items }: { title: string; items: Category[] }) => (
-    <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
-      <div className="px-5 py-4 border-b border-slate-100">
-        <h2 className="font-semibold text-slate-900">{title}</h2>
+    <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+      <div className="px-5 py-4 border-b border-slate-100 dark:border-slate-700">
+        <h2 className="font-semibold text-slate-900 dark:text-white">{title}</h2>
       </div>
       {items.length === 0 ? (
-        <p className="px-5 py-6 text-sm text-slate-400">Chưa có danh mục nào.</p>
+        <p className="px-5 py-6 text-sm text-slate-400 dark:text-slate-500">Chưa có danh mục nào.</p>
       ) : (
-        <div className="divide-y divide-slate-100">
+        <div className="divide-y divide-slate-100 dark:divide-slate-700">
           {items.map((cat) => (
-            <div key={cat.id} className="flex items-center justify-between px-5 py-3.5 group hover:bg-slate-50 transition-colors">
+            <div key={cat.id} className="flex items-center justify-between px-5 py-3.5 group hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
               <div className="flex items-center gap-3">
                 <div className="w-4 h-4 rounded-full flex-shrink-0" style={{ backgroundColor: cat.color }} />
                 <div>
-                  <span className="text-sm font-medium text-slate-700">{cat.name}</span>
+                  <span className="text-sm font-medium text-slate-700 dark:text-slate-200">{cat.name}</span>
                   {cat.budget_limit && (
-                    <p className="text-xs text-slate-400 mt-0.5">Hạn mức: {formatCurrency(cat.budget_limit)}/tháng</p>
+                    <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">Hạn mức: {formatCurrency(cat.budget_limit)}/tháng</p>
                   )}
                 </div>
               </div>
               <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                 <button
                   onClick={() => startEdit(cat)}
-                  className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors"
+                  className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-600 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
                 >
                   <Pencil className="w-4 h-4" />
                 </button>
                 <button
                   onClick={() => handleDelete(cat.id)}
-                  className="p-1.5 rounded-lg hover:bg-red-50 text-slate-400 hover:text-red-500 transition-colors"
+                  className="p-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/30 text-slate-400 hover:text-red-500 transition-colors"
                 >
                   <Trash2 className="w-4 h-4" />
                 </button>
@@ -139,8 +134,8 @@ export default function CategoriesClient({ initialCategories }: Props) {
     <div className="max-w-3xl mx-auto space-y-5">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Danh Mục</h1>
-          <p className="text-slate-500 text-sm mt-1">{categories.length} danh mục</p>
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Danh Mục</h1>
+          <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">{categories.length} danh mục</p>
         </div>
         <button
           onClick={startAdd}
@@ -152,34 +147,32 @@ export default function CategoriesClient({ initialCategories }: Props) {
       </div>
 
       {showForm && (
-        <div className="bg-white rounded-2xl border border-indigo-200 p-5">
+        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-indigo-200 dark:border-indigo-700 p-5">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="font-semibold text-slate-900">{editing ? "Sửa danh mục" : "Danh mục mới"}</h3>
-            <button onClick={() => setShowForm(false)} className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-400">
+            <h3 className="font-semibold text-slate-900 dark:text-white">{editing ? "Sửa danh mục" : "Danh mục mới"}</h3>
+            <button onClick={() => setShowForm(false)} className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-400">
               <X className="w-4 h-4" />
             </button>
           </div>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">Tên</label>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Tên</label>
                 <input
-                  type="text"
-                  value={form.name}
+                  type="text" value={form.name}
                   onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-                  required
-                  maxLength={40}
-                  className="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+                  required maxLength={40}
+                  className="w-full px-4 py-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
                   placeholder="vd. Thực phẩm"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">Loại</label>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Loại</label>
                 <select
                   value={form.type}
                   onChange={(e) => setForm((f) => ({ ...f, type: e.target.value as TransactionType }))}
                   disabled={!!editing}
-                  className="w-full px-3 py-2.5 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm bg-white disabled:opacity-60"
+                  className="w-full px-3 py-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm disabled:opacity-60"
                 >
                   <option value="expense">Chi tiêu</option>
                   <option value="income">Thu nhập</option>
@@ -189,29 +182,25 @@ export default function CategoriesClient({ initialCategories }: Props) {
 
             {form.type === "expense" && (
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                  Hạn mức ngân sách / tháng <span className="text-slate-400 font-normal">(tuỳ chọn)</span>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+                  Hạn mức ngân sách / tháng <span className="text-slate-400 dark:text-slate-500 font-normal">(tuỳ chọn)</span>
                 </label>
                 <input
-                  type="number"
-                  value={form.budget_limit}
+                  type="number" value={form.budget_limit}
                   onChange={(e) => setForm((f) => ({ ...f, budget_limit: e.target.value }))}
-                  min="0"
-                  step="any"
-                  className="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+                  min="0" step="any"
+                  className="w-full px-4 py-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
                   placeholder="Để trống nếu không giới hạn"
                 />
               </div>
             )}
 
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">Màu sắc</label>
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Màu sắc</label>
               <div className="flex flex-wrap gap-2">
                 {CATEGORY_COLORS.map((color) => (
                   <button
-                    key={color}
-                    type="button"
-                    onClick={() => setForm((f) => ({ ...f, color }))}
+                    key={color} type="button" onClick={() => setForm((f) => ({ ...f, color }))}
                     className="w-8 h-8 rounded-full flex items-center justify-center transition-transform hover:scale-110"
                     style={{ backgroundColor: color }}
                   >
@@ -221,21 +210,17 @@ export default function CategoriesClient({ initialCategories }: Props) {
               </div>
             </div>
 
-            {error && (
-              <p className="text-sm text-red-600 bg-red-50 px-4 py-2.5 rounded-lg">{error}</p>
-            )}
+            {error && <p className="text-sm text-red-600 bg-red-50 dark:bg-red-900/20 px-4 py-2.5 rounded-lg">{error}</p>}
 
             <div className="flex gap-3">
               <button
-                type="button"
-                onClick={() => setShowForm(false)}
-                className="flex-1 py-2.5 rounded-xl border border-slate-200 text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors"
+                type="button" onClick={() => setShowForm(false)}
+                className="flex-1 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
               >
                 Hủy
               </button>
               <button
-                type="submit"
-                disabled={loading}
+                type="submit" disabled={loading}
                 className="flex-1 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-60 text-white text-sm font-medium transition-colors"
               >
                 {loading ? "Đang lưu..." : editing ? "Lưu thay đổi" : "Thêm danh mục"}

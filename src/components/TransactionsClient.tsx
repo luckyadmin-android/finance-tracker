@@ -23,7 +23,6 @@ export default function TransactionsClient({ initialTransactions, categories }: 
   const [filterYear, setFilterYear] = useState("");
   const [deleting, setDeleting] = useState<string | null>(null);
 
-
   const supabase = createClient();
 
   const visibleCategories = useMemo(() => {
@@ -50,7 +49,6 @@ export default function TransactionsClient({ initialTransactions, categories }: 
 
   const totalIncome = filtered.filter((t) => t.type === "income").reduce((s, t) => s + t.amount, 0);
   const totalExpense = filtered.filter((t) => t.type === "expense").reduce((s, t) => s + t.amount, 0);
-
   const hasFilters = search || filterType !== "all" || filterCategory !== "all" || filterMonthNum || filterYear;
 
   function clearFilters() {
@@ -81,8 +79,8 @@ export default function TransactionsClient({ initialTransactions, categories }: 
     <div className="max-w-5xl mx-auto space-y-5">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Giao Dịch</h1>
-          <p className="text-slate-500 text-sm mt-1">{transactions.length} giao dịch</p>
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Giao Dịch</h1>
+          <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">{transactions.length} giao dịch</p>
         </div>
         <button
           onClick={() => { setEditing(null); setModalOpen(true); }}
@@ -94,7 +92,7 @@ export default function TransactionsClient({ initialTransactions, categories }: 
       </div>
 
       {/* Filters */}
-      <div className="bg-white rounded-2xl border border-slate-200 p-4 space-y-3">
+      <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-4 space-y-3">
         <div className="flex flex-col sm:flex-row gap-3">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
@@ -103,13 +101,13 @@ export default function TransactionsClient({ initialTransactions, categories }: 
               placeholder="Tìm kiếm theo mô tả hoặc danh mục..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full pl-9 pr-4 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />
           </div>
           <select
             value={filterType}
             onChange={(e) => { setFilterType(e.target.value as TransactionType | "all"); setFilterCategory("all"); }}
-            className="px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white"
+            className="px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
           >
             <option value="all">Tất cả loại</option>
             <option value="income">Thu nhập</option>
@@ -118,7 +116,7 @@ export default function TransactionsClient({ initialTransactions, categories }: 
           <select
             value={filterCategory}
             onChange={(e) => setFilterCategory(e.target.value)}
-            className="px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white"
+            className="px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
           >
             <option value="all">Tất cả danh mục</option>
             {visibleCategories.map((c) => (
@@ -128,7 +126,7 @@ export default function TransactionsClient({ initialTransactions, categories }: 
           <select
             value={filterMonthNum}
             onChange={(e) => setFilterMonthNum(e.target.value)}
-            className="px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white"
+            className="px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
           >
             <option value="">Tháng</option>
             {["01","02","03","04","05","06","07","08","09","10","11","12"].map((m, i) => (
@@ -138,7 +136,7 @@ export default function TransactionsClient({ initialTransactions, categories }: 
           <select
             value={filterYear}
             onChange={(e) => setFilterYear(e.target.value)}
-            className="px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white"
+            className="px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
           >
             <option value="">Năm</option>
             {[2024, 2025, 2026, 2027].map((y) => (
@@ -148,10 +146,10 @@ export default function TransactionsClient({ initialTransactions, categories }: 
         </div>
         {hasFilters && (
           <div className="flex items-center justify-between pt-1">
-            <p className="text-xs text-slate-500">Hiển thị {filtered.length} / {transactions.length} giao dịch</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400">Hiển thị {filtered.length} / {transactions.length} giao dịch</p>
             <button
               onClick={clearFilters}
-              className="flex items-center gap-1 text-xs text-slate-500 hover:text-slate-700 transition-colors"
+              className="flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors"
             >
               <X className="w-3.5 h-3.5" /> Xóa bộ lọc
             </button>
@@ -161,30 +159,30 @@ export default function TransactionsClient({ initialTransactions, categories }: 
 
       {/* Summary row */}
       <div className="grid grid-cols-2 gap-4">
-        <div className="bg-green-50 rounded-xl px-4 py-3 flex items-center justify-between">
-          <span className="text-sm text-green-700 font-medium">Thu nhập</span>
-          <span className="text-sm font-bold text-green-700">{formatCurrency(totalIncome)}</span>
+        <div className="bg-green-50 dark:bg-green-900/20 rounded-xl px-4 py-3 flex items-center justify-between">
+          <span className="text-sm text-green-700 dark:text-green-400 font-medium">Thu nhập</span>
+          <span className="text-sm font-bold text-green-700 dark:text-green-400">{formatCurrency(totalIncome)}</span>
         </div>
-        <div className="bg-red-50 rounded-xl px-4 py-3 flex items-center justify-between">
-          <span className="text-sm text-red-600 font-medium">Chi tiêu</span>
-          <span className="text-sm font-bold text-red-600">{formatCurrency(totalExpense)}</span>
+        <div className="bg-red-50 dark:bg-red-900/20 rounded-xl px-4 py-3 flex items-center justify-between">
+          <span className="text-sm text-red-600 dark:text-red-400 font-medium">Chi tiêu</span>
+          <span className="text-sm font-bold text-red-600 dark:text-red-400">{formatCurrency(totalExpense)}</span>
         </div>
       </div>
 
       {/* Transaction list */}
-      <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
+      <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 overflow-hidden">
         {filtered.length === 0 ? (
-          <div className="py-16 text-center text-slate-400 text-sm">
+          <div className="py-16 text-center text-slate-400 dark:text-slate-500 text-sm">
             {transactions.length === 0
               ? "Chưa có giao dịch. Thêm giao dịch đầu tiên của bạn!"
               : "Không có giao dịch nào khớp với bộ lọc."}
           </div>
         ) : (
-          <div className="divide-y divide-slate-100">
+          <div className="divide-y divide-slate-100 dark:divide-slate-700">
             {filtered.map((t) => (
-              <div key={t.id} className="flex items-center justify-between px-5 py-3.5 hover:bg-slate-50 group transition-colors">
+              <div key={t.id} className="flex items-center justify-between px-5 py-3.5 hover:bg-slate-50 dark:hover:bg-slate-700/50 group transition-colors">
                 <div className="flex items-center gap-3 min-w-0">
-                  <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${t.type === "income" ? "bg-green-50" : "bg-red-50"}`}>
+                  <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${t.type === "income" ? "bg-green-50 dark:bg-green-900/30" : "bg-red-50 dark:bg-red-900/30"}`}>
                     {t.type === "income" ? (
                       <ArrowUpRight className="w-5 h-5 text-green-600" />
                     ) : (
@@ -192,8 +190,8 @@ export default function TransactionsClient({ initialTransactions, categories }: 
                     )}
                   </div>
                   <div className="min-w-0">
-                    <p className="text-sm font-medium text-slate-800 truncate">{t.description}</p>
-                    <p className="text-xs text-slate-400 mt-0.5">
+                    <p className="text-sm font-medium text-slate-800 dark:text-slate-200 truncate">{t.description}</p>
+                    <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">
                       {t.category?.name ?? "Không phân loại"} · {formatDate(t.date)}
                     </p>
                   </div>
@@ -205,14 +203,14 @@ export default function TransactionsClient({ initialTransactions, categories }: 
                   <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                     <button
                       onClick={() => { setEditing(t); setModalOpen(true); }}
-                      className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors"
+                      className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-600 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
                     >
                       <Pencil className="w-4 h-4" />
                     </button>
                     <button
                       onClick={() => handleDelete(t.id)}
                       disabled={deleting === t.id}
-                      className="p-1.5 rounded-lg hover:bg-red-50 text-slate-400 hover:text-red-500 transition-colors"
+                      className="p-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/30 text-slate-400 hover:text-red-500 transition-colors"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>

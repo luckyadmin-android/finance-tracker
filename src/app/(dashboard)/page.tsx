@@ -14,12 +14,8 @@ export default async function DashboardPage() {
   } = await supabase.auth.getUser();
 
   const now = new Date();
-  const firstOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
-    .toISOString()
-    .split("T")[0];
-  const lastOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0)
-    .toISOString()
-    .split("T")[0];
+  const firstOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split("T")[0];
+  const lastOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split("T")[0];
 
   const [{ data: monthTransactions }, { data: categories }] = await Promise.all([
     supabase
@@ -38,22 +34,11 @@ export default async function DashboardPage() {
   ]);
 
   const transactions: Transaction[] = monthTransactions ?? [];
-
-  const totalIncome = transactions
-    .filter((t) => t.type === "income")
-    .reduce((sum, t) => sum + t.amount, 0);
-
-  const totalExpense = transactions
-    .filter((t) => t.type === "expense")
-    .reduce((sum, t) => sum + t.amount, 0);
-
+  const totalIncome = transactions.filter((t) => t.type === "income").reduce((sum, t) => sum + t.amount, 0);
+  const totalExpense = transactions.filter((t) => t.type === "expense").reduce((sum, t) => sum + t.amount, 0);
   const netBalance = totalIncome - totalExpense;
 
-  // Last 6 months data for chart
-  const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 5, 1)
-    .toISOString()
-    .split("T")[0];
-
+  const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 5, 1).toISOString().split("T")[0];
   const { data: allMonthData } = await supabase
     .from("transactions")
     .select("type, amount, date")
@@ -61,7 +46,6 @@ export default async function DashboardPage() {
     .gte("date", sixMonthsAgo)
     .order("date", { ascending: true });
 
-  // Build monthly chart data
   const monthlyMap: Record<string, { income: number; expense: number }> = {};
   (allMonthData ?? []).forEach((t) => {
     const key = t.date.slice(0, 7);
@@ -76,15 +60,12 @@ export default async function DashboardPage() {
     expense: vals.expense,
   }));
 
-  // Spending by category this month
   const expenseMap: Record<string, { name: string; color: string; total: number }> = {};
   transactions
     .filter((t) => t.type === "expense" && t.category)
     .forEach((t) => {
       const catId = t.category_id!;
-      if (!expenseMap[catId]) {
-        expenseMap[catId] = { name: t.category!.name, color: t.category!.color, total: 0 };
-      }
+      if (!expenseMap[catId]) expenseMap[catId] = { name: t.category!.name, color: t.category!.color, total: 0 };
       expenseMap[catId].total += t.amount;
     });
 
@@ -92,7 +73,6 @@ export default async function DashboardPage() {
     .sort((a, b) => b.total - a.total)
     .map((c) => ({ name: c.name, value: c.total, color: c.color }));
 
-  // Budget overview data
   const spendingByCategoryId: Record<string, number> = {};
   transactions
     .filter((t) => t.type === "expense" && t.category_id)
@@ -109,61 +89,57 @@ export default async function DashboardPage() {
   return (
     <div className="max-w-6xl mx-auto space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-slate-900">Tổng Quan</h1>
-        <p className="text-slate-500 text-sm mt-1">{monthLabel}</p>
+        <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Tổng Quan</h1>
+        <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">{monthLabel}</p>
       </div>
 
-      {/* Summary cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="bg-white rounded-2xl border border-slate-200 p-5">
+        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5">
           <div className="flex items-center justify-between mb-3">
-            <span className="text-sm font-medium text-slate-500">Thu nhập</span>
-            <div className="w-9 h-9 bg-green-50 rounded-xl flex items-center justify-center">
+            <span className="text-sm font-medium text-slate-500 dark:text-slate-400">Thu nhập</span>
+            <div className="w-9 h-9 bg-green-50 dark:bg-green-900/30 rounded-xl flex items-center justify-center">
               <TrendingUp className="w-5 h-5 text-green-600" />
             </div>
           </div>
-          <p className="text-2xl font-bold text-slate-900">{formatCurrency(totalIncome)}</p>
-          <p className="text-xs text-slate-400 mt-1">Tháng này</p>
+          <p className="text-2xl font-bold text-slate-900 dark:text-white">{formatCurrency(totalIncome)}</p>
+          <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">Tháng này</p>
         </div>
 
-        <div className="bg-white rounded-2xl border border-slate-200 p-5">
+        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5">
           <div className="flex items-center justify-between mb-3">
-            <span className="text-sm font-medium text-slate-500">Chi tiêu</span>
-            <div className="w-9 h-9 bg-red-50 rounded-xl flex items-center justify-center">
+            <span className="text-sm font-medium text-slate-500 dark:text-slate-400">Chi tiêu</span>
+            <div className="w-9 h-9 bg-red-50 dark:bg-red-900/30 rounded-xl flex items-center justify-center">
               <TrendingDown className="w-5 h-5 text-red-500" />
             </div>
           </div>
-          <p className="text-2xl font-bold text-slate-900">{formatCurrency(totalExpense)}</p>
-          <p className="text-xs text-slate-400 mt-1">Tháng này</p>
+          <p className="text-2xl font-bold text-slate-900 dark:text-white">{formatCurrency(totalExpense)}</p>
+          <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">Tháng này</p>
         </div>
 
-        <div className="bg-white rounded-2xl border border-slate-200 p-5">
+        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5">
           <div className="flex items-center justify-between mb-3">
-            <span className="text-sm font-medium text-slate-500">Số dư</span>
-            <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${netBalance >= 0 ? "bg-indigo-50" : "bg-orange-50"}`}>
+            <span className="text-sm font-medium text-slate-500 dark:text-slate-400">Số dư</span>
+            <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${netBalance >= 0 ? "bg-indigo-50 dark:bg-indigo-900/30" : "bg-orange-50 dark:bg-orange-900/30"}`}>
               <Wallet className={`w-5 h-5 ${netBalance >= 0 ? "text-indigo-600" : "text-orange-500"}`} />
             </div>
           </div>
-          <p className={`text-2xl font-bold ${netBalance >= 0 ? "text-slate-900" : "text-orange-600"}`}>
+          <p className={`text-2xl font-bold ${netBalance >= 0 ? "text-slate-900 dark:text-white" : "text-orange-600"}`}>
             {formatCurrency(netBalance)}
           </p>
-          <p className="text-xs text-slate-400 mt-1">Thu nhập trừ chi tiêu</p>
+          <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">Thu nhập trừ chi tiêu</p>
         </div>
       </div>
 
-      {/* Charts */}
       <DashboardCharts chartData={chartData} categoryData={categoryData} />
 
-      {/* Budget overview */}
       {budgetItems.length > 0 && <BudgetOverview items={budgetItems} />}
 
-      {/* Recent transactions */}
-      <div className="bg-white rounded-2xl border border-slate-200">
-        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
-          <h2 className="font-semibold text-slate-900">Giao Dịch Gần Đây</h2>
+      <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 dark:border-slate-700">
+          <h2 className="font-semibold text-slate-900 dark:text-white">Giao Dịch Gần Đây</h2>
           <Link
             href="/transactions"
-            className="flex items-center gap-1 text-sm text-indigo-600 hover:text-indigo-700 font-medium"
+            className="flex items-center gap-1 text-sm text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 font-medium"
           >
             Xem tất cả <ArrowRight className="w-4 h-4" />
           </Link>
