@@ -1,8 +1,9 @@
 import { createClient } from "@/lib/supabase/server";
 import { formatCurrency } from "@/lib/utils";
-import { Transaction } from "@/types";
+import { Transaction, Category } from "@/types";
 import DashboardCharts from "@/components/DashboardCharts";
 import RecentTransactions from "@/components/RecentTransactions";
+import BudgetOverview, { BudgetItem } from "@/components/BudgetOverview";
 import { TrendingUp, TrendingDown, Wallet, ArrowRight } from "lucide-react";
 import Link from "next/link";
 
@@ -20,14 +21,21 @@ export default async function DashboardPage() {
     .toISOString()
     .split("T")[0];
 
-  // Current month transactions
-  const { data: monthTransactions } = await supabase
-    .from("transactions")
-    .select("*, category:categories(*)")
-    .eq("user_id", user!.id)
-    .gte("date", firstOfMonth)
-    .lte("date", lastOfMonth)
-    .order("date", { ascending: false });
+  const [{ data: monthTransactions }, { data: categories }] = await Promise.all([
+    supabase
+      .from("transactions")
+      .select("*, category:categories(*)")
+      .eq("user_id", user!.id)
+      .gte("date", firstOfMonth)
+      .lte("date", lastOfMonth)
+      .order("date", { ascending: false }),
+    supabase
+      .from("categories")
+      .select("*")
+      .eq("user_id", user!.id)
+      .eq("type", "expense")
+      .not("budget_limit", "is", null),
+  ]);
 
   const transactions: Transaction[] = monthTransactions ?? [];
 
@@ -56,16 +64,14 @@ export default async function DashboardPage() {
   // Build monthly chart data
   const monthlyMap: Record<string, { income: number; expense: number }> = {};
   (allMonthData ?? []).forEach((t) => {
-    const key = t.date.slice(0, 7); // "YYYY-MM"
+    const key = t.date.slice(0, 7);
     if (!monthlyMap[key]) monthlyMap[key] = { income: 0, expense: 0 };
     if (t.type === "income") monthlyMap[key].income += t.amount;
     else monthlyMap[key].expense += t.amount;
   });
 
   const chartData = Object.entries(monthlyMap).map(([month, vals]) => ({
-    month: new Date(month + "-01").toLocaleDateString("en-US", {
-      month: "short",
-    }),
+    month: new Date(month + "-01").toLocaleDateString("vi-VN", { month: "short" }),
     income: vals.income,
     expense: vals.expense,
   }));
@@ -77,24 +83,28 @@ export default async function DashboardPage() {
     .forEach((t) => {
       const catId = t.category_id!;
       if (!expenseMap[catId]) {
-        expenseMap[catId] = {
-          name: t.category!.name,
-          color: t.category!.color,
-          total: 0,
-        };
+        expenseMap[catId] = { name: t.category!.name, color: t.category!.color, total: 0 };
       }
       expenseMap[catId].total += t.amount;
     });
 
   const categoryData = Object.values(expenseMap)
     .sort((a, b) => b.total - a.total)
-    .map((c) => ({
-      name: c.name,
-      value: c.total,
-      color: c.color,
-    }));
+    .map((c) => ({ name: c.name, value: c.total, color: c.color }));
 
-  const monthLabel = now.toLocaleDateString("en-US", { month: "long", year: "numeric" });
+  // Budget overview data
+  const spendingByCategoryId: Record<string, number> = {};
+  transactions
+    .filter((t) => t.type === "expense" && t.category_id)
+    .forEach((t) => {
+      spendingByCategoryId[t.category_id!] = (spendingByCategoryId[t.category_id!] ?? 0) + t.amount;
+    });
+
+  const budgetItems: BudgetItem[] = (categories ?? [])
+    .filter((c): c is Category & { budget_limit: number } => !!c.budget_limit)
+    .map((c) => ({ category: c as Category, spent: spendingByCategoryId[c.id] ?? 0 }));
+
+  const monthLabel = now.toLocaleDateString("vi-VN", { month: "long", year: "numeric" });
 
   return (
     <div className="max-w-6xl mx-auto space-y-6">
@@ -130,21 +140,11 @@ export default async function DashboardPage() {
         <div className="bg-white rounded-2xl border border-slate-200 p-5">
           <div className="flex items-center justify-between mb-3">
             <span className="text-sm font-medium text-slate-500">Số dư</span>
-            <div
-              className={`w-9 h-9 rounded-xl flex items-center justify-center ${
-                netBalance >= 0 ? "bg-indigo-50" : "bg-orange-50"
-              }`}
-            >
-              <Wallet
-                className={`w-5 h-5 ${netBalance >= 0 ? "text-indigo-600" : "text-orange-500"}`}
-              />
+            <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${netBalance >= 0 ? "bg-indigo-50" : "bg-orange-50"}`}>
+              <Wallet className={`w-5 h-5 ${netBalance >= 0 ? "text-indigo-600" : "text-orange-500"}`} />
             </div>
           </div>
-          <p
-            className={`text-2xl font-bold ${
-              netBalance >= 0 ? "text-slate-900" : "text-orange-600"
-            }`}
-          >
+          <p className={`text-2xl font-bold ${netBalance >= 0 ? "text-slate-900" : "text-orange-600"}`}>
             {formatCurrency(netBalance)}
           </p>
           <p className="text-xs text-slate-400 mt-1">Thu nhập trừ chi tiêu</p>
@@ -153,6 +153,9 @@ export default async function DashboardPage() {
 
       {/* Charts */}
       <DashboardCharts chartData={chartData} categoryData={categoryData} />
+
+      {/* Budget overview */}
+      {budgetItems.length > 0 && <BudgetOverview items={budgetItems} />}
 
       {/* Recent transactions */}
       <div className="bg-white rounded-2xl border border-slate-200">

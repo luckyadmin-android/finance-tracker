@@ -6,6 +6,7 @@ export interface Category {
   name: string;
   type: TransactionType;
   color: string;
+  budget_limit?: number | null;
   created_at: string;
 }
 

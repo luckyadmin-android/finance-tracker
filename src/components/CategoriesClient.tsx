@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Category, TransactionType } from "@/types";
-import { CATEGORY_COLORS } from "@/lib/utils";
+import { CATEGORY_COLORS, formatCurrency } from "@/lib/utils";
 import { Plus, Pencil, Trash2, X, Check } from "lucide-react";
 
 interface Props {
@@ -14,9 +14,10 @@ interface FormState {
   name: string;
   type: TransactionType;
   color: string;
+  budget_limit: string;
 }
 
-const DEFAULT_FORM: FormState = { name: "", type: "expense", color: CATEGORY_COLORS[0] };
+const DEFAULT_FORM: FormState = { name: "", type: "expense", color: CATEGORY_COLORS[0], budget_limit: "" };
 
 export default function CategoriesClient({ initialCategories }: Props) {
   const [categories, setCategories] = useState(initialCategories);
@@ -40,21 +41,30 @@ export default function CategoriesClient({ initialCategories }: Props) {
 
   function startEdit(cat: Category) {
     setEditing(cat.id);
-    setForm({ name: cat.name, type: cat.type, color: cat.color });
+    setForm({
+      name: cat.name,
+      type: cat.type,
+      color: cat.color,
+      budget_limit: cat.budget_limit ? String(cat.budget_limit) : "",
+    });
     setError("");
     setShowForm(true);
   }
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!form.name.trim()) return;
     setLoading(true);
     setError("");
 
+    const budgetVal = form.budget_limit && parseFloat(form.budget_limit) > 0
+      ? parseFloat(form.budget_limit)
+      : null;
+
     if (editing) {
       const { data, error: err } = await supabase
         .from("categories")
-        .update({ name: form.name.trim(), color: form.color })
+        .update({ name: form.name.trim(), color: form.color, budget_limit: budgetVal })
         .eq("id", editing)
         .select()
         .single();
@@ -64,7 +74,7 @@ export default function CategoriesClient({ initialCategories }: Props) {
     } else {
       const { data, error: err } = await supabase
         .from("categories")
-        .insert({ name: form.name.trim(), type: form.type, color: form.color })
+        .insert({ name: form.name.trim(), type: form.type, color: form.color, budget_limit: budgetVal })
         .select()
         .single();
 
@@ -96,8 +106,13 @@ export default function CategoriesClient({ initialCategories }: Props) {
           {items.map((cat) => (
             <div key={cat.id} className="flex items-center justify-between px-5 py-3.5 group hover:bg-slate-50 transition-colors">
               <div className="flex items-center gap-3">
-                <div className="w-4 h-4 rounded-full" style={{ backgroundColor: cat.color }} />
-                <span className="text-sm font-medium text-slate-700">{cat.name}</span>
+                <div className="w-4 h-4 rounded-full flex-shrink-0" style={{ backgroundColor: cat.color }} />
+                <div>
+                  <span className="text-sm font-medium text-slate-700">{cat.name}</span>
+                  {cat.budget_limit && (
+                    <p className="text-xs text-slate-400 mt-0.5">Hạn mức: {formatCurrency(cat.budget_limit)}/tháng</p>
+                  )}
+                </div>
               </div>
               <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                 <button
@@ -171,6 +186,23 @@ export default function CategoriesClient({ initialCategories }: Props) {
                 </select>
               </div>
             </div>
+
+            {form.type === "expense" && (
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                  Hạn mức ngân sách / tháng <span className="text-slate-400 font-normal">(tuỳ chọn)</span>
+                </label>
+                <input
+                  type="number"
+                  value={form.budget_limit}
+                  onChange={(e) => setForm((f) => ({ ...f, budget_limit: e.target.value }))}
+                  min="0"
+                  step="any"
+                  className="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+                  placeholder="Để trống nếu không giới hạn"
+                />
+              </div>
+            )}
 
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-2">Màu sắc</label>
