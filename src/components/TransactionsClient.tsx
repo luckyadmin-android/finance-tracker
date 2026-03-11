@@ -19,8 +19,10 @@ export default function TransactionsClient({ initialTransactions, categories }: 
   const [search, setSearch] = useState("");
   const [filterType, setFilterType] = useState<TransactionType | "all">("all");
   const [filterCategory, setFilterCategory] = useState("all");
-  const [filterMonth, setFilterMonth] = useState("");
+  const [filterMonthNum, setFilterMonthNum] = useState("");
+  const [filterYear, setFilterYear] = useState("");
   const [deleting, setDeleting] = useState<string | null>(null);
+
 
   const supabase = createClient();
 
@@ -33,7 +35,9 @@ export default function TransactionsClient({ initialTransactions, categories }: 
     return transactions.filter((t) => {
       if (filterType !== "all" && t.type !== filterType) return false;
       if (filterCategory !== "all" && t.category_id !== filterCategory) return false;
-      if (filterMonth && !t.date.startsWith(filterMonth)) return false;
+      if (filterYear && filterMonthNum && !t.date.startsWith(`${filterYear}-${filterMonthNum}`)) return false;
+      if (filterYear && !filterMonthNum && !t.date.startsWith(filterYear)) return false;
+      if (!filterYear && filterMonthNum && t.date.slice(5, 7) !== filterMonthNum) return false;
       if (
         search &&
         !t.description.toLowerCase().includes(search.toLowerCase()) &&
@@ -42,18 +46,19 @@ export default function TransactionsClient({ initialTransactions, categories }: 
         return false;
       return true;
     });
-  }, [transactions, filterType, filterCategory, filterMonth, search]);
+  }, [transactions, filterType, filterCategory, filterYear, filterMonthNum, search]);
 
   const totalIncome = filtered.filter((t) => t.type === "income").reduce((s, t) => s + t.amount, 0);
   const totalExpense = filtered.filter((t) => t.type === "expense").reduce((s, t) => s + t.amount, 0);
 
-  const hasFilters = search || filterType !== "all" || filterCategory !== "all" || filterMonth;
+  const hasFilters = search || filterType !== "all" || filterCategory !== "all" || filterMonthNum || filterYear;
 
   function clearFilters() {
     setSearch("");
     setFilterType("all");
     setFilterCategory("all");
-    setFilterMonth("");
+    setFilterMonthNum("");
+    setFilterYear("");
   }
 
   async function handleDelete(id: string) {
@@ -120,12 +125,26 @@ export default function TransactionsClient({ initialTransactions, categories }: 
               <option key={c.id} value={c.id}>{c.name}</option>
             ))}
           </select>
-          <input
-            type="month"
-            value={filterMonth}
-            onChange={(e) => setFilterMonth(e.target.value)}
-            className="px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          />
+          <select
+            value={filterMonthNum}
+            onChange={(e) => setFilterMonthNum(e.target.value)}
+            className="px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white"
+          >
+            <option value="">Tháng</option>
+            {["01","02","03","04","05","06","07","08","09","10","11","12"].map((m, i) => (
+              <option key={m} value={m}>Tháng {i + 1}</option>
+            ))}
+          </select>
+          <select
+            value={filterYear}
+            onChange={(e) => setFilterYear(e.target.value)}
+            className="px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white"
+          >
+            <option value="">Năm</option>
+            {[2024, 2025, 2026, 2027].map((y) => (
+              <option key={y} value={y}>{y}</option>
+            ))}
+          </select>
         </div>
         {hasFilters && (
           <div className="flex items-center justify-between pt-1">
