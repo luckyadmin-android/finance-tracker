@@ -63,10 +63,10 @@ export default function DashboardCharts({ chartData, categoryData }: Props) {
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
       {/* Monthly bar chart */}
       <div className="bg-white rounded-2xl border border-slate-200 p-5">
-        <h2 className="font-semibold text-slate-900 mb-4">Monthly Overview</h2>
+        <h2 className="font-semibold text-slate-900 mb-4">Tổng Quan Theo Tháng</h2>
         {chartData.length === 0 ? (
           <div className="h-48 flex items-center justify-center text-slate-400 text-sm">
-            No data yet
+            Chưa có dữ liệu
           </div>
         ) : (
           <ResponsiveContainer width="100%" height={220}>
@@ -80,8 +80,8 @@ export default function DashboardCharts({ chartData, categoryData }: Props) {
                 tickFormatter={(v) => `$${v >= 1000 ? `${(v / 1000).toFixed(0)}k` : v}`}
               />
               <Tooltip content={<CurrencyTooltip />} />
-              <Bar dataKey="income" fill="#22c55e" radius={[4, 4, 0, 0]} name="income" />
-              <Bar dataKey="expense" fill="#f43f5e" radius={[4, 4, 0, 0]} name="expense" />
+              <Bar dataKey="income" fill="#22c55e" radius={[4, 4, 0, 0]} name="Thu nhập" />
+              <Bar dataKey="expense" fill="#f43f5e" radius={[4, 4, 0, 0]} name="Chi tiêu" />
             </BarChart>
           </ResponsiveContainer>
         )}
@@ -89,10 +89,10 @@ export default function DashboardCharts({ chartData, categoryData }: Props) {
 
       {/* Spending by category pie chart */}
       <div className="bg-white rounded-2xl border border-slate-200 p-5">
-        <h2 className="font-semibold text-slate-900 mb-4">Spending by Category</h2>
+        <h2 className="font-semibold text-slate-900 mb-4">Chi Tiêu Theo Danh Mục</h2>
         {categoryData.length === 0 ? (
           <div className="h-48 flex items-center justify-center text-slate-400 text-sm">
-            No expense data this month
+            Chưa có dữ liệu chi tiêu tháng này
           </div>
         ) : (
           <ResponsiveContainer width="100%" height={220}>

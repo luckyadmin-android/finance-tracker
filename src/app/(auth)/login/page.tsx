@@ -37,8 +37,8 @@ export default function LoginPage() {
           <div className="inline-flex items-center justify-center w-14 h-14 bg-indigo-600 rounded-2xl mb-4">
             <TrendingUp className="w-7 h-7 text-white" />
           </div>
-          <h1 className="text-2xl font-bold text-slate-900">Finance Tracker</h1>
-          <p className="text-slate-500 mt-1">Sign in to your account</p>
+          <h1 className="text-2xl font-bold text-slate-900">Quản Lý Tài Chính</h1>
+          <p className="text-slate-500 mt-1">Đăng nhập vào tài khoản của bạn</p>
         </div>
 
         <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-8">
@@ -53,12 +53,12 @@ export default function LoginPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 className="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
-                placeholder="you@example.com"
+                placeholder="ban@example.com"
               />
             </div>
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                Password
+                Mật khẩu
               </label>
               <input
                 type="password"
@@ -81,14 +81,14 @@ export default function LoginPage() {
               disabled={loading}
               className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:opacity-60 text-white font-medium py-2.5 rounded-lg transition-colors text-sm"
             >
-              {loading ? "Signing in..." : "Sign in"}
+              {loading ? "Đang đăng nhập..." : "Đăng nhập"}
             </button>
           </form>
 
           <p className="text-center text-sm text-slate-500 mt-6">
-            Don&apos;t have an account?{" "}
+            Chưa có tài khoản?{" "}
             <Link href="/signup" className="text-indigo-600 hover:text-indigo-700 font-medium">
-              Sign up
+              Đăng ký
             </Link>
           </p>
         </div>

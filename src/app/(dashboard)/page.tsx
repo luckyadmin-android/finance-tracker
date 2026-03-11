@@ -99,7 +99,7 @@ export default async function DashboardPage() {
   return (
     <div className="max-w-6xl mx-auto space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-slate-900">Dashboard</h1>
+        <h1 className="text-2xl font-bold text-slate-900">Tổng Quan</h1>
         <p className="text-slate-500 text-sm mt-1">{monthLabel}</p>
       </div>
 
@@ -107,29 +107,29 @@ export default async function DashboardPage() {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="bg-white rounded-2xl border border-slate-200 p-5">
           <div className="flex items-center justify-between mb-3">
-            <span className="text-sm font-medium text-slate-500">Income</span>
+            <span className="text-sm font-medium text-slate-500">Thu nhập</span>
             <div className="w-9 h-9 bg-green-50 rounded-xl flex items-center justify-center">
               <TrendingUp className="w-5 h-5 text-green-600" />
             </div>
           </div>
           <p className="text-2xl font-bold text-slate-900">{formatCurrency(totalIncome)}</p>
-          <p className="text-xs text-slate-400 mt-1">This month</p>
+          <p className="text-xs text-slate-400 mt-1">Tháng này</p>
         </div>
 
         <div className="bg-white rounded-2xl border border-slate-200 p-5">
           <div className="flex items-center justify-between mb-3">
-            <span className="text-sm font-medium text-slate-500">Expenses</span>
+            <span className="text-sm font-medium text-slate-500">Chi tiêu</span>
             <div className="w-9 h-9 bg-red-50 rounded-xl flex items-center justify-center">
               <TrendingDown className="w-5 h-5 text-red-500" />
             </div>
           </div>
           <p className="text-2xl font-bold text-slate-900">{formatCurrency(totalExpense)}</p>
-          <p className="text-xs text-slate-400 mt-1">This month</p>
+          <p className="text-xs text-slate-400 mt-1">Tháng này</p>
         </div>
 
         <div className="bg-white rounded-2xl border border-slate-200 p-5">
           <div className="flex items-center justify-between mb-3">
-            <span className="text-sm font-medium text-slate-500">Net Balance</span>
+            <span className="text-sm font-medium text-slate-500">Số dư</span>
             <div
               className={`w-9 h-9 rounded-xl flex items-center justify-center ${
                 netBalance >= 0 ? "bg-indigo-50" : "bg-orange-50"
@@ -147,7 +147,7 @@ export default async function DashboardPage() {
           >
             {formatCurrency(netBalance)}
           </p>
-          <p className="text-xs text-slate-400 mt-1">Income minus expenses</p>
+          <p className="text-xs text-slate-400 mt-1">Thu nhập trừ chi tiêu</p>
         </div>
       </div>
 
@@ -157,12 +157,12 @@ export default async function DashboardPage() {
       {/* Recent transactions */}
       <div className="bg-white rounded-2xl border border-slate-200">
         <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
-          <h2 className="font-semibold text-slate-900">Recent Transactions</h2>
+          <h2 className="font-semibold text-slate-900">Giao Dịch Gần Đây</h2>
           <Link
             href="/transactions"
             className="flex items-center gap-1 text-sm text-indigo-600 hover:text-indigo-700 font-medium"
           >
-            View all <ArrowRight className="w-4 h-4" />
+            Xem tất cả <ArrowRight className="w-4 h-4" />
           </Link>
         </div>
         <RecentTransactions transactions={transactions.slice(0, 8)} />

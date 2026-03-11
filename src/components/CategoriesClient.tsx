@@ -79,7 +79,7 @@ export default function CategoriesClient({ initialCategories }: Props) {
   }
 
   async function handleDelete(id: string) {
-    if (!confirm("Delete this category? Transactions using it will become uncategorized.")) return;
+    if (!confirm("Xóa danh mục này? Các giao dịch liên quan sẽ không được phân loại.")) return;
     await supabase.from("categories").delete().eq("id", id);
     setCategories((prev) => prev.filter((c) => c.id !== id));
   }
@@ -90,7 +90,7 @@ export default function CategoriesClient({ initialCategories }: Props) {
         <h2 className="font-semibold text-slate-900">{title}</h2>
       </div>
       {items.length === 0 ? (
-        <p className="px-5 py-6 text-sm text-slate-400">No categories yet.</p>
+        <p className="px-5 py-6 text-sm text-slate-400">Chưa có danh mục nào.</p>
       ) : (
         <div className="divide-y divide-slate-100">
           {items.map((cat) => (
@@ -124,22 +124,22 @@ export default function CategoriesClient({ initialCategories }: Props) {
     <div className="max-w-3xl mx-auto space-y-5">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Categories</h1>
-          <p className="text-slate-500 text-sm mt-1">{categories.length} categories total</p>
+          <h1 className="text-2xl font-bold text-slate-900">Danh Mục</h1>
+          <p className="text-slate-500 text-sm mt-1">{categories.length} danh mục</p>
         </div>
         <button
           onClick={startAdd}
           className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-xl text-sm font-medium transition-colors"
         >
           <Plus className="w-4 h-4" />
-          Add category
+          Thêm danh mục
         </button>
       </div>
 
       {showForm && (
         <div className="bg-white rounded-2xl border border-indigo-200 p-5">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="font-semibold text-slate-900">{editing ? "Edit category" : "New category"}</h3>
+            <h3 className="font-semibold text-slate-900">{editing ? "Sửa danh mục" : "Danh mục mới"}</h3>
             <button onClick={() => setShowForm(false)} className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-400">
               <X className="w-4 h-4" />
             </button>
@@ -147,7 +147,7 @@ export default function CategoriesClient({ initialCategories }: Props) {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">Name</label>
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">Tên</label>
                 <input
                   type="text"
                   value={form.name}
@@ -155,25 +155,25 @@ export default function CategoriesClient({ initialCategories }: Props) {
                   required
                   maxLength={40}
                   className="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
-                  placeholder="e.g. Groceries"
+                  placeholder="vd. Thực phẩm"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">Type</label>
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">Loại</label>
                 <select
                   value={form.type}
                   onChange={(e) => setForm((f) => ({ ...f, type: e.target.value as TransactionType }))}
                   disabled={!!editing}
                   className="w-full px-3 py-2.5 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm bg-white disabled:opacity-60"
                 >
-                  <option value="expense">Expense</option>
-                  <option value="income">Income</option>
+                  <option value="expense">Chi tiêu</option>
+                  <option value="income">Thu nhập</option>
                 </select>
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">Color</label>
+              <label className="block text-sm font-medium text-slate-700 mb-2">Màu sắc</label>
               <div className="flex flex-wrap gap-2">
                 {CATEGORY_COLORS.map((color) => (
                   <button
@@ -199,22 +199,22 @@ export default function CategoriesClient({ initialCategories }: Props) {
                 onClick={() => setShowForm(false)}
                 className="flex-1 py-2.5 rounded-xl border border-slate-200 text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors"
               >
-                Cancel
+                Hủy
               </button>
               <button
                 type="submit"
                 disabled={loading}
                 className="flex-1 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-60 text-white text-sm font-medium transition-colors"
               >
-                {loading ? "Saving..." : editing ? "Save changes" : "Add category"}
+                {loading ? "Đang lưu..." : editing ? "Lưu thay đổi" : "Thêm danh mục"}
               </button>
             </div>
           </form>
         </div>
       )}
 
-      <CategorySection title="Expense Categories" items={expenseCategories} />
-      <CategorySection title="Income Categories" items={incomeCategories} />
+      <CategorySection title="Danh Mục Chi Tiêu" items={expenseCategories} />
+      <CategorySection title="Danh Mục Thu Nhập" items={incomeCategories} />
     </div>
   );
 }

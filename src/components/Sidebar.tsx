@@ -16,9 +16,9 @@ import {
 } from "lucide-react";
 
 const NAV_ITEMS = [
-  { href: "/", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/transactions", label: "Transactions", icon: ArrowLeftRight },
-  { href: "/categories", label: "Categories", icon: Tag },
+  { href: "/", label: "Tổng Quan", icon: LayoutDashboard },
+  { href: "/transactions", label: "Giao Dịch", icon: ArrowLeftRight },
+  { href: "/categories", label: "Danh Mục", icon: Tag },
 ];
 
 export default function Sidebar({ userEmail }: { userEmail: string }) {
@@ -40,7 +40,7 @@ export default function Sidebar({ userEmail }: { userEmail: string }) {
           <div className="w-9 h-9 bg-indigo-600 rounded-xl flex items-center justify-center">
             <TrendingUp className="w-5 h-5 text-white" />
           </div>
-          <span className="font-bold text-slate-900 text-lg">Finance</span>
+          <span className="font-bold text-slate-900 text-lg">Tài Chính</span>
         </div>
       </div>
 
@@ -75,7 +75,7 @@ export default function Sidebar({ userEmail }: { userEmail: string }) {
           className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-all"
         >
           <LogOut className="w-5 h-5 text-slate-400" />
-          Sign out
+          Đăng xuất
         </button>
       </div>
     </div>
@@ -100,7 +100,7 @@ export default function Sidebar({ userEmail }: { userEmail: string }) {
           <div className="w-7 h-7 bg-indigo-600 rounded-lg flex items-center justify-center">
             <TrendingUp className="w-4 h-4 text-white" />
           </div>
-          <span className="font-bold text-slate-900">Finance</span>
+          <span className="font-bold text-slate-900">Tài Chính</span>
         </div>
       </div>
 

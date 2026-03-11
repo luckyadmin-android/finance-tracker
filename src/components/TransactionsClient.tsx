@@ -41,7 +41,7 @@ export default function TransactionsClient({ initialTransactions, categories }: 
   const totalExpense = filtered.filter((t) => t.type === "expense").reduce((s, t) => s + t.amount, 0);
 
   async function handleDelete(id: string) {
-    if (!confirm("Delete this transaction?")) return;
+    if (!confirm("Xóa giao dịch này?")) return;
     setDeleting(id);
     await supabase.from("transactions").delete().eq("id", id);
     setTransactions((prev) => prev.filter((t) => t.id !== id));
@@ -60,15 +60,15 @@ export default function TransactionsClient({ initialTransactions, categories }: 
     <div className="max-w-5xl mx-auto space-y-5">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Transactions</h1>
-          <p className="text-slate-500 text-sm mt-1">{transactions.length} total transactions</p>
+          <h1 className="text-2xl font-bold text-slate-900">Giao Dịch</h1>
+          <p className="text-slate-500 text-sm mt-1">{transactions.length} giao dịch</p>
         </div>
         <button
           onClick={() => { setEditing(null); setModalOpen(true); }}
           className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-xl text-sm font-medium transition-colors"
         >
           <Plus className="w-4 h-4" />
-          Add transaction
+          Thêm giao dịch
         </button>
       </div>
 
@@ -78,7 +78,7 @@ export default function TransactionsClient({ initialTransactions, categories }: 
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
           <input
             type="text"
-            placeholder="Search transactions..."
+            placeholder="Tìm kiếm giao dịch..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="w-full pl-9 pr-4 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
@@ -89,9 +89,9 @@ export default function TransactionsClient({ initialTransactions, categories }: 
           onChange={(e) => setFilterType(e.target.value as TransactionType | "all")}
           className="px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white"
         >
-          <option value="all">All types</option>
-          <option value="income">Income</option>
-          <option value="expense">Expense</option>
+          <option value="all">Tất cả</option>
+          <option value="income">Thu nhập</option>
+          <option value="expense">Chi tiêu</option>
         </select>
         <input
           type="month"
@@ -104,11 +104,11 @@ export default function TransactionsClient({ initialTransactions, categories }: 
       {/* Summary row */}
       <div className="grid grid-cols-2 gap-4">
         <div className="bg-green-50 rounded-xl px-4 py-3 flex items-center justify-between">
-          <span className="text-sm text-green-700 font-medium">Filtered income</span>
+          <span className="text-sm text-green-700 font-medium">Thu nhập lọc</span>
           <span className="text-sm font-bold text-green-700">{formatCurrency(totalIncome)}</span>
         </div>
         <div className="bg-red-50 rounded-xl px-4 py-3 flex items-center justify-between">
-          <span className="text-sm text-red-600 font-medium">Filtered expenses</span>
+          <span className="text-sm text-red-600 font-medium">Chi tiêu lọc</span>
           <span className="text-sm font-bold text-red-600">{formatCurrency(totalExpense)}</span>
         </div>
       </div>
@@ -118,8 +118,8 @@ export default function TransactionsClient({ initialTransactions, categories }: 
         {filtered.length === 0 ? (
           <div className="py-16 text-center text-slate-400 text-sm">
             {transactions.length === 0
-              ? "No transactions yet. Add your first one!"
-              : "No transactions match your filters."}
+              ? "Chưa có giao dịch. Thêm giao dịch đầu tiên của bạn!"
+              : "Không có giao dịch nào khớp với bộ lọc."}
           </div>
         ) : (
           <div className="divide-y divide-slate-100">
@@ -140,7 +140,7 @@ export default function TransactionsClient({ initialTransactions, categories }: 
                   <div className="min-w-0">
                     <p className="text-sm font-medium text-slate-800 truncate">{t.description}</p>
                     <p className="text-xs text-slate-400 mt-0.5">
-                      {t.category?.name ?? "Uncategorized"} · {formatDate(t.date)}
+                      {t.category?.name ?? "Không phân loại"} · {formatDate(t.date)}
                     </p>
                   </div>
                 </div>

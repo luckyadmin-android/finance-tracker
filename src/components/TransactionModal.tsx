@@ -77,7 +77,7 @@ export default function TransactionModal({ transaction, categories, onClose, onS
       <div className="bg-white rounded-2xl shadow-xl w-full max-w-md">
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
           <h2 className="font-semibold text-slate-900">
-            {transaction ? "Edit transaction" : "Add transaction"}
+            {transaction ? "Sửa giao dịch" : "Thêm giao dịch"}
           </h2>
           <button
             onClick={onClose}
@@ -103,13 +103,13 @@ export default function TransactionModal({ transaction, categories, onClose, onS
                     : "bg-white text-slate-500 hover:bg-slate-50"
                 }`}
               >
-                {t}
+                {t === "income" ? "Thu nhập" : "Chi tiêu"}
               </button>
             ))}
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1.5">Amount</label>
+            <label className="block text-sm font-medium text-slate-700 mb-1.5">Số tiền</label>
             <div className="relative">
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">$</span>
               <input
@@ -126,7 +126,7 @@ export default function TransactionModal({ transaction, categories, onClose, onS
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1.5">Description</label>
+            <label className="block text-sm font-medium text-slate-700 mb-1.5">Mô tả</label>
             <input
               type="text"
               value={description}
@@ -134,26 +134,26 @@ export default function TransactionModal({ transaction, categories, onClose, onS
               required
               maxLength={100}
               className="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
-              placeholder="e.g. Grocery shopping"
+              placeholder="vd. Mua sắm tạp hóa"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1.5">Category</label>
+              <label className="block text-sm font-medium text-slate-700 mb-1.5">Danh mục</label>
               <select
                 value={categoryId}
                 onChange={(e) => setCategoryId(e.target.value)}
                 className="w-full px-3 py-2.5 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm bg-white"
               >
-                <option value="">None</option>
+                <option value="">Không có</option>
                 {filteredCategories.map((c) => (
                   <option key={c.id} value={c.id}>{c.name}</option>
                 ))}
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1.5">Date</label>
+              <label className="block text-sm font-medium text-slate-700 mb-1.5">Ngày</label>
               <input
                 type="date"
                 value={date}
@@ -174,14 +174,14 @@ export default function TransactionModal({ transaction, categories, onClose, onS
               onClick={onClose}
               className="flex-1 py-2.5 rounded-xl border border-slate-200 text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors"
             >
-              Cancel
+              Hủy
             </button>
             <button
               type="submit"
               disabled={loading}
               className="flex-1 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-60 text-white text-sm font-medium transition-colors"
             >
-              {loading ? "Saving..." : transaction ? "Save changes" : "Add transaction"}
+              {loading ? "Đang lưu..." : transaction ? "Lưu thay đổi" : "Thêm giao dịch"}
             </button>
           </div>
         </form>

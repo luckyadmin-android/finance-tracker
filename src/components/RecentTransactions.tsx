@@ -10,7 +10,7 @@ export default function RecentTransactions({
   if (transactions.length === 0) {
     return (
       <div className="px-5 py-10 text-center text-slate-400 text-sm">
-        No transactions this month. Add your first one!
+        Chưa có giao dịch tháng này. Thêm giao dịch đầu tiên của bạn!
       </div>
     );
   }
