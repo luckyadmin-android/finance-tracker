@@ -1,7 +1,7 @@
 "use client";
 
 import { Category } from "@/types";
-import { formatCurrency } from "@/lib/utils";
+import { useCurrency } from "@/components/CurrencyProvider";
 import { AlertTriangle, CheckCircle } from "lucide-react";
 
 export interface BudgetItem {
@@ -9,11 +9,8 @@ export interface BudgetItem {
   spent: number;
 }
 
-interface Props {
-  items: BudgetItem[];
-}
-
-export default function BudgetOverview({ items }: Props) {
+export default function BudgetOverview({ items }: { items: BudgetItem[] }) {
+  const { fmt } = useCurrency();
   if (items.length === 0) return null;
 
   return (
@@ -35,37 +32,22 @@ export default function BudgetOverview({ items }: Props) {
                 <div className="flex items-center gap-2">
                   <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: category.color }} />
                   <span className="text-sm font-medium text-slate-700 dark:text-slate-200">{category.name}</span>
-                  {over && (
-                    <span className="flex items-center gap-1 text-xs text-red-500 font-medium">
-                      <AlertTriangle className="w-3.5 h-3.5" /> Vượt hạn mức
-                    </span>
-                  )}
-                  {warn && (
-                    <span className="flex items-center gap-1 text-xs text-amber-500 font-medium">
-                      <AlertTriangle className="w-3.5 h-3.5" /> Gần đạt giới hạn
-                    </span>
-                  )}
-                  {!over && !warn && spent > 0 && (
-                    <span className="flex items-center gap-1 text-xs text-green-600 font-medium">
-                      <CheckCircle className="w-3.5 h-3.5" /> Ổn
-                    </span>
-                  )}
+                  {over && <span className="flex items-center gap-1 text-xs text-red-500 font-medium"><AlertTriangle className="w-3.5 h-3.5" />Vượt hạn mức</span>}
+                  {warn && <span className="flex items-center gap-1 text-xs text-amber-500 font-medium"><AlertTriangle className="w-3.5 h-3.5" />Gần đạt giới hạn</span>}
+                  {!over && !warn && spent > 0 && <span className="flex items-center gap-1 text-xs text-green-600 font-medium"><CheckCircle className="w-3.5 h-3.5" />Ổn</span>}
                 </div>
                 <span className={`text-sm font-semibold ${over ? "text-red-600" : "text-slate-700 dark:text-slate-200"}`}>
-                  {formatCurrency(spent)} / {formatCurrency(limit)}
+                  {fmt(spent)} / {fmt(limit)}
                 </span>
               </div>
               <div className="w-full bg-slate-100 dark:bg-slate-700 rounded-full h-2">
-                <div
-                  className={`h-2 rounded-full transition-all duration-300 ${over ? "bg-red-500" : warn ? "bg-amber-400" : "bg-green-500"}`}
-                  style={{ width: `${pct}%` }}
-                />
+                <div className={`h-2 rounded-full transition-all duration-300 ${over ? "bg-red-500" : warn ? "bg-amber-400" : "bg-green-500"}`} style={{ width: `${pct}%` }} />
               </div>
               <div className="flex justify-between mt-1.5">
                 {over ? (
-                  <p className="text-xs text-red-500">Vượt {formatCurrency(spent - limit)}</p>
+                  <p className="text-xs text-red-500">Vượt {fmt(spent - limit)}</p>
                 ) : (
-                  <p className="text-xs text-slate-400 dark:text-slate-500">Còn lại {formatCurrency(limit - spent)}</p>
+                  <p className="text-xs text-slate-400 dark:text-slate-500">Còn lại {fmt(limit - spent)}</p>
                 )}
                 <p className="text-xs text-slate-400 dark:text-slate-500">{Math.round(pct)}%</p>
               </div>

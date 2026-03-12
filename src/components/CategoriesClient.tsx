@@ -3,12 +3,9 @@
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Category, TransactionType } from "@/types";
-import { CATEGORY_COLORS, formatCurrency } from "@/lib/utils";
+import { CATEGORY_COLORS } from "@/lib/utils";
+import { useCurrency } from "@/components/CurrencyProvider";
 import { Plus, Pencil, Trash2, X, Check } from "lucide-react";
-
-interface Props {
-  initialCategories: Category[];
-}
 
 interface FormState {
   name: string;
@@ -19,68 +16,49 @@ interface FormState {
 
 const DEFAULT_FORM: FormState = { name: "", type: "expense", color: CATEGORY_COLORS[0], budget_limit: "" };
 
-export default function CategoriesClient({ initialCategories }: Props) {
+export default function CategoriesClient({ initialCategories }: { initialCategories: Category[] }) {
   const [categories, setCategories] = useState(initialCategories);
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState<FormState>(DEFAULT_FORM);
   const [editing, setEditing] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const { fmt } = useCurrency();
 
   const supabase = createClient();
-
   const incomeCategories = categories.filter((c) => c.type === "income");
   const expenseCategories = categories.filter((c) => c.type === "expense");
 
   function startAdd() {
-    setEditing(null);
-    setForm(DEFAULT_FORM);
-    setError("");
-    setShowForm(true);
+    setEditing(null); setForm(DEFAULT_FORM); setError(""); setShowForm(true);
   }
 
   function startEdit(cat: Category) {
     setEditing(cat.id);
-    setForm({
-      name: cat.name,
-      type: cat.type,
-      color: cat.color,
-      budget_limit: cat.budget_limit ? String(cat.budget_limit) : "",
-    });
-    setError("");
-    setShowForm(true);
+    setForm({ name: cat.name, type: cat.type, color: cat.color, budget_limit: cat.budget_limit ? String(cat.budget_limit) : "" });
+    setError(""); setShowForm(true);
   }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!form.name.trim()) return;
-    setLoading(true);
-    setError("");
-
-    const budgetVal = form.budget_limit && parseFloat(form.budget_limit) > 0
-      ? parseFloat(form.budget_limit)
-      : null;
+    setLoading(true); setError("");
+    const budgetVal = form.budget_limit && parseFloat(form.budget_limit) > 0 ? parseFloat(form.budget_limit) : null;
 
     if (editing) {
       const { data, error: err } = await supabase
-        .from("categories")
-        .update({ name: form.name.trim(), color: form.color, budget_limit: budgetVal })
+        .from("categories").update({ name: form.name.trim(), color: form.color, budget_limit: budgetVal })
         .eq("id", editing).select().single();
       if (err) { setError(err.message); setLoading(false); return; }
       setCategories((prev) => prev.map((c) => (c.id === editing ? (data as Category) : c)));
     } else {
       const { data, error: err } = await supabase
-        .from("categories")
-        .insert({ name: form.name.trim(), type: form.type, color: form.color, budget_limit: budgetVal })
+        .from("categories").insert({ name: form.name.trim(), type: form.type, color: form.color, budget_limit: budgetVal })
         .select().single();
       if (err) { setError(err.message); setLoading(false); return; }
       setCategories((prev) => [...prev, data as Category]);
     }
-
-    setShowForm(false);
-    setEditing(null);
-    setForm(DEFAULT_FORM);
-    setLoading(false);
+    setShowForm(false); setEditing(null); setForm(DEFAULT_FORM); setLoading(false);
   }
 
   async function handleDelete(id: string) {
@@ -105,21 +83,15 @@ export default function CategoriesClient({ initialCategories }: Props) {
                 <div>
                   <span className="text-sm font-medium text-slate-700 dark:text-slate-200">{cat.name}</span>
                   {cat.budget_limit && (
-                    <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">Hạn mức: {formatCurrency(cat.budget_limit)}/tháng</p>
+                    <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">Hạn mức: {fmt(cat.budget_limit)}/tháng</p>
                   )}
                 </div>
               </div>
               <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                <button
-                  onClick={() => startEdit(cat)}
-                  className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-600 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
-                >
+                <button onClick={() => startEdit(cat)} className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-600 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors">
                   <Pencil className="w-4 h-4" />
                 </button>
-                <button
-                  onClick={() => handleDelete(cat.id)}
-                  className="p-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/30 text-slate-400 hover:text-red-500 transition-colors"
-                >
+                <button onClick={() => handleDelete(cat.id)} className="p-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/30 text-slate-400 hover:text-red-500 transition-colors">
                   <Trash2 className="w-4 h-4" />
                 </button>
               </div>
@@ -137,12 +109,8 @@ export default function CategoriesClient({ initialCategories }: Props) {
           <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Danh Mục</h1>
           <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">{categories.length} danh mục</p>
         </div>
-        <button
-          onClick={startAdd}
-          className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-xl text-sm font-medium transition-colors"
-        >
-          <Plus className="w-4 h-4" />
-          Thêm danh mục
+        <button onClick={startAdd} className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-xl text-sm font-medium transition-colors">
+          <Plus className="w-4 h-4" /> Thêm danh mục
         </button>
       </div>
 
@@ -158,9 +126,7 @@ export default function CategoriesClient({ initialCategories }: Props) {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Tên</label>
-                <input
-                  type="text" value={form.name}
-                  onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
+                <input type="text" value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
                   required maxLength={40}
                   className="w-full px-4 py-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
                   placeholder="vd. Thực phẩm"
@@ -168,9 +134,7 @@ export default function CategoriesClient({ initialCategories }: Props) {
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Loại</label>
-                <select
-                  value={form.type}
-                  onChange={(e) => setForm((f) => ({ ...f, type: e.target.value as TransactionType }))}
+                <select value={form.type} onChange={(e) => setForm((f) => ({ ...f, type: e.target.value as TransactionType }))}
                   disabled={!!editing}
                   className="w-full px-3 py-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm disabled:opacity-60"
                 >
@@ -183,11 +147,9 @@ export default function CategoriesClient({ initialCategories }: Props) {
             {form.type === "expense" && (
               <div>
                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
-                  Hạn mức ngân sách / tháng <span className="text-slate-400 dark:text-slate-500 font-normal">(tuỳ chọn)</span>
+                  Hạn mức ngân sách / tháng <span className="text-slate-400 font-normal">(tuỳ chọn)</span>
                 </label>
-                <input
-                  type="number" value={form.budget_limit}
-                  onChange={(e) => setForm((f) => ({ ...f, budget_limit: e.target.value }))}
+                <input type="number" value={form.budget_limit} onChange={(e) => setForm((f) => ({ ...f, budget_limit: e.target.value }))}
                   min="0" step="any"
                   className="w-full px-4 py-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
                   placeholder="Để trống nếu không giới hạn"
@@ -199,8 +161,7 @@ export default function CategoriesClient({ initialCategories }: Props) {
               <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Màu sắc</label>
               <div className="flex flex-wrap gap-2">
                 {CATEGORY_COLORS.map((color) => (
-                  <button
-                    key={color} type="button" onClick={() => setForm((f) => ({ ...f, color }))}
+                  <button key={color} type="button" onClick={() => setForm((f) => ({ ...f, color }))}
                     className="w-8 h-8 rounded-full flex items-center justify-center transition-transform hover:scale-110"
                     style={{ backgroundColor: color }}
                   >
@@ -213,14 +174,12 @@ export default function CategoriesClient({ initialCategories }: Props) {
             {error && <p className="text-sm text-red-600 bg-red-50 dark:bg-red-900/20 px-4 py-2.5 rounded-lg">{error}</p>}
 
             <div className="flex gap-3">
-              <button
-                type="button" onClick={() => setShowForm(false)}
+              <button type="button" onClick={() => setShowForm(false)}
                 className="flex-1 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
               >
                 Hủy
               </button>
-              <button
-                type="submit" disabled={loading}
+              <button type="submit" disabled={loading}
                 className="flex-1 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-60 text-white text-sm font-medium transition-colors"
               >
                 {loading ? "Đang lưu..." : editing ? "Lưu thay đổi" : "Thêm danh mục"}

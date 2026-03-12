@@ -4,24 +4,19 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { cn } from "@/lib/utils";
+import { cn, CURRENCIES, type CurrencyCode } from "@/lib/utils";
 import { useTheme } from "@/components/ThemeProvider";
+import { useCurrency } from "@/components/CurrencyProvider";
 import {
-  TrendingUp,
-  LayoutDashboard,
-  ArrowLeftRight,
-  Tag,
-  LogOut,
-  Menu,
-  X,
-  Moon,
-  Sun,
+  TrendingUp, LayoutDashboard, ArrowLeftRight, Tag, Target,
+  LogOut, Menu, X, Moon, Sun,
 } from "lucide-react";
 
 const NAV_ITEMS = [
   { href: "/", label: "Tổng Quan", icon: LayoutDashboard },
   { href: "/transactions", label: "Giao Dịch", icon: ArrowLeftRight },
   { href: "/categories", label: "Danh Mục", icon: Tag },
+  { href: "/goals", label: "Mục Tiêu", icon: Target },
 ];
 
 export default function Sidebar({ userEmail }: { userEmail: string }) {
@@ -29,6 +24,7 @@ export default function Sidebar({ userEmail }: { userEmail: string }) {
   const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
   const { theme, toggle } = useTheme();
+  const { currency, setCurrency } = useCurrency();
 
   async function handleSignOut() {
     const supabase = createClient();
@@ -53,9 +49,7 @@ export default function Sidebar({ userEmail }: { userEmail: string }) {
           const active = pathname === href;
           return (
             <Link
-              key={href}
-              href={href}
-              onClick={() => setMobileOpen(false)}
+              key={href} href={href} onClick={() => setMobileOpen(false)}
               className={cn(
                 "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all",
                 active
@@ -70,18 +64,28 @@ export default function Sidebar({ userEmail }: { userEmail: string }) {
         })}
       </nav>
 
-      <div className="px-4 py-4 border-t border-slate-200 dark:border-slate-700 space-y-1">
+      <div className="px-4 py-4 border-t border-slate-200 dark:border-slate-700 space-y-2">
+        <div className="px-3 py-1.5">
+          <label className="block text-xs text-slate-400 dark:text-slate-500 mb-1.5">Tiền tệ</label>
+          <select
+            value={currency}
+            onChange={(e) => setCurrency(e.target.value as CurrencyCode)}
+            className="w-full px-2 py-1.5 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          >
+            {(Object.entries(CURRENCIES) as [CurrencyCode, typeof CURRENCIES[CurrencyCode]][]).map(([code, cfg]) => (
+              <option key={code} value={code}>{cfg.label}</option>
+            ))}
+          </select>
+        </div>
+
         <button
           onClick={toggle}
           className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 hover:text-slate-900 dark:hover:text-white transition-all"
         >
-          {theme === "dark" ? (
-            <Sun className="w-5 h-5 text-amber-400" />
-          ) : (
-            <Moon className="w-5 h-5 text-slate-400" />
-          )}
+          {theme === "dark" ? <Sun className="w-5 h-5 text-amber-400" /> : <Moon className="w-5 h-5 text-slate-400" />}
           {theme === "dark" ? "Chế độ sáng" : "Chế độ tối"}
         </button>
+
         <div className="px-3 py-1">
           <p className="text-xs text-slate-400 dark:text-slate-500 truncate">{userEmail}</p>
         </div>
@@ -98,17 +102,12 @@ export default function Sidebar({ userEmail }: { userEmail: string }) {
 
   return (
     <>
-      {/* Desktop sidebar */}
       <aside className="hidden lg:flex flex-col fixed inset-y-0 left-0 w-64 bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 z-30">
         <SidebarContent />
       </aside>
 
-      {/* Mobile top bar */}
       <div className="lg:hidden fixed top-0 inset-x-0 h-14 bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 z-30 flex items-center px-4 gap-3">
-        <button
-          onClick={() => setMobileOpen(true)}
-          className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
-        >
+        <button onClick={() => setMobileOpen(true)} className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
           <Menu className="w-5 h-5 text-slate-600 dark:text-slate-300" />
         </button>
         <div className="flex items-center gap-2">
@@ -118,32 +117,18 @@ export default function Sidebar({ userEmail }: { userEmail: string }) {
           <span className="font-bold text-slate-900 dark:text-white">Tài Chính</span>
         </div>
         <div className="ml-auto">
-          <button
-            onClick={toggle}
-            className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
-          >
-            {theme === "dark" ? (
-              <Sun className="w-5 h-5 text-amber-400" />
-            ) : (
-              <Moon className="w-5 h-5 text-slate-500" />
-            )}
+          <button onClick={toggle} className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
+            {theme === "dark" ? <Sun className="w-5 h-5 text-amber-400" /> : <Moon className="w-5 h-5 text-slate-500" />}
           </button>
         </div>
       </div>
 
-      {/* Mobile drawer */}
       {mobileOpen && (
         <>
-          <div
-            className="lg:hidden fixed inset-0 bg-black/40 z-40"
-            onClick={() => setMobileOpen(false)}
-          />
+          <div className="lg:hidden fixed inset-0 bg-black/40 z-40" onClick={() => setMobileOpen(false)} />
           <aside className="lg:hidden fixed inset-y-0 left-0 w-64 bg-white dark:bg-slate-800 z-50 flex flex-col">
             <div className="absolute right-3 top-3">
-              <button
-                onClick={() => setMobileOpen(false)}
-                className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700"
-              >
+              <button onClick={() => setMobileOpen(false)} className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700">
                 <X className="w-5 h-5 text-slate-500 dark:text-slate-400" />
               </button>
             </div>
@@ -152,7 +137,6 @@ export default function Sidebar({ userEmail }: { userEmail: string }) {
         </>
       )}
 
-      {/* Mobile top padding spacer */}
       <div className="lg:hidden h-14" />
     </>
   );

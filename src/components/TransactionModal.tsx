@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { Transaction, Category, TransactionType } from "@/types";
-import { X } from "lucide-react";
+import { Transaction, Category, TransactionType, RecurrenceType } from "@/types";
+import { calcNextOccurrence, RECURRENCE_LABELS } from "@/lib/utils";
+import { X, RefreshCw } from "lucide-react";
 
 interface Props {
   transaction: Transaction | null;
@@ -18,6 +19,8 @@ export default function TransactionModal({ transaction, categories, onClose, onS
   const [description, setDescription] = useState(transaction?.description ?? "");
   const [categoryId, setCategoryId] = useState(transaction?.category_id ?? "");
   const [date, setDate] = useState(transaction?.date ?? new Date().toISOString().split("T")[0]);
+  const [isRecurring, setIsRecurring] = useState(transaction?.is_recurring ?? false);
+  const [recurrence, setRecurrence] = useState<RecurrenceType>(transaction?.recurrence ?? "monthly");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -38,7 +41,16 @@ export default function TransactionModal({ transaction, categories, onClose, onS
 
     setLoading(true);
     const supabase = createClient();
-    const payload = { type, amount: parsed, description: description.trim(), category_id: categoryId || null, date };
+    const payload = {
+      type,
+      amount: parsed,
+      description: description.trim(),
+      category_id: categoryId || null,
+      date,
+      is_recurring: isRecurring,
+      recurrence: isRecurring ? recurrence : null,
+      next_occurrence: isRecurring ? calcNextOccurrence(date, recurrence) : null,
+    };
 
     if (transaction) {
       const { data, error: err } = await supabase
@@ -58,7 +70,7 @@ export default function TransactionModal({ transaction, categories, onClose, onS
 
   return (
     <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
-      <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl w-full max-w-md">
+      <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-700">
           <h2 className="font-semibold text-slate-900 dark:text-white">
             {transaction ? "Sửa giao dịch" : "Thêm giao dịch"}
@@ -71,8 +83,7 @@ export default function TransactionModal({ transaction, categories, onClose, onS
         <form onSubmit={handleSubmit} className="px-6 py-5 space-y-4">
           <div className="flex rounded-xl border border-slate-200 dark:border-slate-600 overflow-hidden">
             {(["expense", "income"] as TransactionType[]).map((t) => (
-              <button
-                key={t} type="button" onClick={() => setType(t)}
+              <button key={t} type="button" onClick={() => setType(t)}
                 className={`flex-1 py-2.5 text-sm font-medium capitalize transition-colors ${
                   type === t
                     ? t === "income" ? "bg-green-600 text-white" : "bg-red-500 text-white"
@@ -86,15 +97,12 @@ export default function TransactionModal({ transaction, categories, onClose, onS
 
           <div>
             <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Số tiền</label>
-            <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">$</span>
-              <input
-                type="number" step="0.01" min="0.01" value={amount}
-                onChange={(e) => setAmount(e.target.value)} required
-                className="w-full pl-7 pr-4 py-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
-                placeholder="0.00"
-              />
-            </div>
+            <input
+              type="number" step="any" min="0.01" value={amount}
+              onChange={(e) => setAmount(e.target.value)} required
+              className="w-full px-4 py-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+              placeholder="0"
+            />
           </div>
 
           <div>
@@ -110,8 +118,7 @@ export default function TransactionModal({ transaction, categories, onClose, onS
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Danh mục</label>
-              <select
-                value={categoryId} onChange={(e) => setCategoryId(e.target.value)}
+              <select value={categoryId} onChange={(e) => setCategoryId(e.target.value)}
                 className="w-full px-3 py-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
               >
                 <option value="">Không có</option>
@@ -120,24 +127,58 @@ export default function TransactionModal({ transaction, categories, onClose, onS
             </div>
             <div>
               <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Ngày</label>
-              <input
-                type="date" value={date} onChange={(e) => setDate(e.target.value)} required
+              <input type="date" value={date} onChange={(e) => setDate(e.target.value)} required
                 className="w-full px-3 py-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
               />
             </div>
           </div>
 
+          {/* Recurring */}
+          <div className="rounded-xl border border-slate-200 dark:border-slate-600 p-3.5 space-y-3">
+            <label className="flex items-center gap-3 cursor-pointer">
+              <div className="relative">
+                <input type="checkbox" className="sr-only" checked={isRecurring} onChange={(e) => setIsRecurring(e.target.checked)} />
+                <div className={`w-10 h-5 rounded-full transition-colors ${isRecurring ? "bg-indigo-600" : "bg-slate-300 dark:bg-slate-600"}`} />
+                <div className={`absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform ${isRecurring ? "translate-x-5" : ""}`} />
+              </div>
+              <div className="flex items-center gap-2">
+                <RefreshCw className={`w-4 h-4 ${isRecurring ? "text-indigo-600" : "text-slate-400"}`} />
+                <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Giao dịch lặp lại</span>
+              </div>
+            </label>
+
+            {isRecurring && (
+              <div>
+                <label className="block text-xs text-slate-500 dark:text-slate-400 mb-1.5">Chu kỳ lặp lại</label>
+                <div className="grid grid-cols-2 gap-2">
+                  {(Object.entries(RECURRENCE_LABELS) as [RecurrenceType, string][]).map(([key, label]) => (
+                    <button key={key} type="button" onClick={() => setRecurrence(key)}
+                      className={`py-2 rounded-lg text-xs font-medium border transition-colors ${
+                        recurrence === key
+                          ? "bg-indigo-600 text-white border-indigo-600"
+                          : "bg-white dark:bg-slate-700 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-600 hover:border-indigo-400"
+                      }`}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+                <p className="text-xs text-slate-400 dark:text-slate-500 mt-2">
+                  Lần tiếp theo: {calcNextOccurrence(date, recurrence)}
+                </p>
+              </div>
+            )}
+          </div>
+
           {error && <p className="text-sm text-red-600 bg-red-50 dark:bg-red-900/20 px-4 py-2.5 rounded-lg">{error}</p>}
 
           <div className="flex gap-3 pt-2">
-            <button
-              type="button" onClick={onClose}
+            <button type="button" onClick={onClose}
               className="flex-1 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
             >
               Hủy
             </button>
-            <button
-              type="submit" disabled={loading}
+            <button type="submit" disabled={loading}
               className="flex-1 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-60 text-white text-sm font-medium transition-colors"
             >
               {loading ? "Đang lưu..." : transaction ? "Lưu thay đổi" : "Thêm giao dịch"}

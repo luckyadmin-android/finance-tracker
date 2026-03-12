@@ -1,4 +1,5 @@
 export type TransactionType = "income" | "expense";
+export type RecurrenceType = "daily" | "weekly" | "monthly" | "yearly";
 
 export interface Category {
   id: string;
@@ -18,8 +19,22 @@ export interface Transaction {
   amount: number;
   description: string;
   date: string;
+  is_recurring: boolean;
+  recurrence?: RecurrenceType | null;
+  next_occurrence?: string | null;
   created_at: string;
   category?: Category;
+}
+
+export interface Goal {
+  id: string;
+  user_id: string;
+  name: string;
+  target_amount: number;
+  current_amount: number;
+  color: string;
+  deadline?: string | null;
+  created_at: string;
 }
 
 export interface MonthlySummary {

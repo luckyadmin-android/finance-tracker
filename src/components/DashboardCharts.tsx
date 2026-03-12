@@ -5,13 +5,13 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, PieChart, Pie, Cell, Legend,
 } from "recharts";
-import { formatCurrency } from "@/lib/utils";
+import { useCurrency } from "@/components/CurrencyProvider";
 
 interface MonthData { month: string; income: number; expense: number; }
 interface CategoryData { name: string; value: number; color: string; }
 interface Props { chartData: MonthData[]; categoryData: CategoryData[]; }
 
-function CurrencyTooltip({ active, payload, label }: { active?: boolean; payload?: { name: string; value: number; color: string }[]; label?: string }) {
+function CurrencyTooltip({ active, payload, label, fmt }: { active?: boolean; payload?: { name: string; value: number; color: string }[]; label?: string; fmt: (n: number) => string }) {
   if (!active || !payload?.length) return null;
   return (
     <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-lg p-3 text-sm">
@@ -20,24 +20,25 @@ function CurrencyTooltip({ active, payload, label }: { active?: boolean; payload
         <div key={p.name} className="flex items-center gap-2">
           <div className="w-2 h-2 rounded-full" style={{ background: p.color }} />
           <span className="text-slate-500 dark:text-slate-400 capitalize">{p.name}:</span>
-          <span className="font-medium text-slate-800 dark:text-slate-200">{formatCurrency(p.value)}</span>
+          <span className="font-medium text-slate-800 dark:text-slate-200">{fmt(p.value)}</span>
         </div>
       ))}
     </div>
   );
 }
 
-function PieTooltip({ active, payload }: { active?: boolean; payload?: { name: string; value: number }[] }) {
+function PieTooltip({ active, payload, fmt }: { active?: boolean; payload?: { name: string; value: number }[]; fmt: (n: number) => string }) {
   if (!active || !payload?.length) return null;
   return (
     <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-lg p-3 text-sm">
       <p className="font-semibold text-slate-700 dark:text-slate-200">{payload[0].name}</p>
-      <p className="text-slate-600 dark:text-slate-400 mt-1">{formatCurrency(payload[0].value)}</p>
+      <p className="text-slate-600 dark:text-slate-400 mt-1">{fmt(payload[0].value)}</p>
     </div>
   );
 }
 
 export default function DashboardCharts({ chartData, categoryData }: Props) {
+  const { fmt } = useCurrency();
   const [isDark, setIsDark] = useState(false);
 
   useEffect(() => {
@@ -63,8 +64,8 @@ export default function DashboardCharts({ chartData, categoryData }: Props) {
             <BarChart data={chartData} barGap={4}>
               <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
               <XAxis dataKey="month" tick={{ fontSize: 12, fill: tickColor }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fontSize: 12, fill: tickColor }} axisLine={false} tickLine={false} tickFormatter={(v) => `$${v >= 1000 ? `${(v / 1000).toFixed(0)}k` : v}`} />
-              <Tooltip content={<CurrencyTooltip />} />
+              <YAxis tick={{ fontSize: 12, fill: tickColor }} axisLine={false} tickLine={false} tickFormatter={(v) => fmt(v)} />
+              <Tooltip content={<CurrencyTooltip fmt={fmt} />} />
               <Bar dataKey="income" fill="#22c55e" radius={[4, 4, 0, 0]} name="Thu nhập" />
               <Bar dataKey="expense" fill="#f43f5e" radius={[4, 4, 0, 0]} name="Chi tiêu" />
             </BarChart>
@@ -80,11 +81,9 @@ export default function DashboardCharts({ chartData, categoryData }: Props) {
           <ResponsiveContainer width="100%" height={220}>
             <PieChart>
               <Pie data={categoryData} cx="50%" cy="45%" innerRadius={55} outerRadius={85} paddingAngle={3} dataKey="value">
-                {categoryData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.color} />
-                ))}
+                {categoryData.map((entry, index) => <Cell key={`cell-${index}`} fill={entry.color} />)}
               </Pie>
-              <Tooltip content={<PieTooltip />} />
+              <Tooltip content={<PieTooltip fmt={fmt} />} />
               <Legend formatter={(value) => <span style={{ fontSize: 12, color: legendColor }}>{value}</span>} />
             </PieChart>
           </ResponsiveContainer>
