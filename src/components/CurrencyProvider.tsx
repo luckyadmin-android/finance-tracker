@@ -1,24 +1,19 @@
 "use client";
 
 import { createContext, useContext } from "react";
-import type { CurrencyCode } from "@/lib/utils";
-import { formatCurrency as _fmt } from "@/lib/utils";
+import { formatCurrency } from "@/lib/utils";
 
 interface CurrencyContextType {
-  currency: CurrencyCode;
-  setCurrency: (c: CurrencyCode) => void;
   fmt: (amount: number) => string;
 }
 
 const CurrencyContext = createContext<CurrencyContextType>({
-  currency: "VND",
-  setCurrency: () => {},
-  fmt: (n) => _fmt(n, "VND"),
+  fmt: (n) => formatCurrency(n, "VND"),
 });
 
 export function CurrencyProvider({ children }: { children: React.ReactNode }) {
   return (
-    <CurrencyContext.Provider value={{ currency: "VND", setCurrency: () => {}, fmt: (n) => _fmt(n, "VND") }}>
+    <CurrencyContext.Provider value={{ fmt: (n) => formatCurrency(n, "VND") }}>
       {children}
     </CurrencyContext.Provider>
   );

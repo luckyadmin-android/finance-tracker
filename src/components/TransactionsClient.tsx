@@ -3,10 +3,12 @@
 import { useState, useMemo, useEffect, useRef } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Transaction, Category, TransactionType } from "@/types";
-import { formatDate, RECURRENCE_LABELS, calcNextFutureOccurrence } from "@/lib/utils";
+import { RECURRENCE_LABELS, calcNextFutureOccurrence } from "@/lib/utils";
 import { useCurrency } from "@/components/CurrencyProvider";
 import TransactionModal from "@/components/TransactionModal";
-import { Plus, Pencil, Trash2, ArrowUpRight, ArrowDownRight, Search, X, Download, RefreshCw } from "lucide-react";
+import TransactionFilters from "@/components/TransactionFilters";
+import TransactionList from "@/components/TransactionList";
+import { Plus, Download } from "lucide-react";
 
 interface Props {
   initialTransactions: Transaction[];
@@ -25,7 +27,6 @@ export default function TransactionsClient({ initialTransactions, categories }: 
   const [deleting, setDeleting] = useState<string | null>(null);
   const recurringProcessed = useRef(false);
   const { fmt } = useCurrency();
-
   const supabase = createClient();
 
   // Auto-create due recurring transactions on mount
@@ -45,28 +46,17 @@ export default function TransactionsClient({ initialTransactions, categories }: 
         const occurrenceDate = t.next_occurrence!;
         const nextFuture = calcNextFutureOccurrence(occurrenceDate, t.recurrence!);
 
-        // Create new transaction for the due date
         const { data: created } = await supabase
           .from("transactions")
           .insert({
-            type: t.type,
-            amount: t.amount,
-            description: t.description,
-            category_id: t.category_id,
-            date: occurrenceDate,
-            is_recurring: true,
-            recurrence: t.recurrence,
-            next_occurrence: nextFuture,
+            type: t.type, amount: t.amount, description: t.description,
+            category_id: t.category_id, date: occurrenceDate,
+            is_recurring: true, recurrence: t.recurrence, next_occurrence: nextFuture,
           })
           .select("*, category:categories(*)")
           .single();
 
-        // Clear next_occurrence on the old transaction (it's been consumed)
-        await supabase
-          .from("transactions")
-          .update({ next_occurrence: null })
-          .eq("id", t.id);
-
+        await supabase.from("transactions").update({ next_occurrence: null }).eq("id", t.id);
         if (created) newTransactions.push(created as Transaction);
       }
 
@@ -88,6 +78,13 @@ export default function TransactionsClient({ initialTransactions, categories }: 
     return categories.filter((c) => c.type === filterType);
   }, [categories, filterType]);
 
+  const availableYears = useMemo(() => {
+    const currentYear = new Date().getFullYear();
+    const years = new Set(transactions.map((t) => parseInt(t.date.slice(0, 4))));
+    years.add(currentYear);
+    return Array.from(years).sort((a, b) => b - a);
+  }, [transactions]);
+
   const filtered = useMemo(() => {
     return transactions.filter((t) => {
       if (filterType !== "all" && t.type !== filterType) return false;
@@ -106,7 +103,6 @@ export default function TransactionsClient({ initialTransactions, categories }: 
 
   const totalIncome = filtered.filter((t) => t.type === "income").reduce((s, t) => s + t.amount, 0);
   const totalExpense = filtered.filter((t) => t.type === "expense").reduce((s, t) => s + t.amount, 0);
-  const hasFilters = search || filterType !== "all" || filterCategory !== "all" || filterMonthNum || filterYear;
 
   function clearFilters() {
     setSearch(""); setFilterType("all"); setFilterCategory("all");
@@ -161,74 +157,30 @@ export default function TransactionsClient({ initialTransactions, categories }: 
             onClick={exportCSV}
             className="flex items-center gap-2 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors"
           >
-            <Download className="w-4 h-4" />
-            Xuất CSV
+            <Download className="w-4 h-4" /> Xuất CSV
           </button>
           <button
             onClick={() => { setEditing(null); setModalOpen(true); }}
             className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-xl text-sm font-medium transition-colors"
           >
-            <Plus className="w-4 h-4" />
-            Thêm giao dịch
+            <Plus className="w-4 h-4" /> Thêm giao dịch
           </button>
         </div>
       </div>
 
-      {/* Filters */}
-      <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-4 space-y-3">
-        <div className="flex flex-col sm:flex-row gap-3">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-            <input
-              type="text" placeholder="Tìm kiếm theo mô tả hoặc danh mục..." value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            />
-          </div>
-          <select
-            value={filterType}
-            onChange={(e) => { setFilterType(e.target.value as TransactionType | "all"); setFilterCategory("all"); }}
-            className="px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          >
-            <option value="all">Tất cả loại</option>
-            <option value="income">Thu nhập</option>
-            <option value="expense">Chi tiêu</option>
-          </select>
-          <select
-            value={filterCategory} onChange={(e) => setFilterCategory(e.target.value)}
-            className="px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          >
-            <option value="all">Tất cả danh mục</option>
-            {visibleCategories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
-          </select>
-          <select
-            value={filterMonthNum} onChange={(e) => setFilterMonthNum(e.target.value)}
-            className="px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          >
-            <option value="">Tháng</option>
-            {["01","02","03","04","05","06","07","08","09","10","11","12"].map((m, i) => (
-              <option key={m} value={m}>Tháng {i + 1}</option>
-            ))}
-          </select>
-          <select
-            value={filterYear} onChange={(e) => setFilterYear(e.target.value)}
-            className="px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          >
-            <option value="">Năm</option>
-            {[2024, 2025, 2026, 2027].map((y) => <option key={y} value={y}>{y}</option>)}
-          </select>
-        </div>
-        {hasFilters && (
-          <div className="flex items-center justify-between pt-1">
-            <p className="text-xs text-slate-500 dark:text-slate-400">Hiển thị {filtered.length} / {transactions.length} giao dịch</p>
-            <button onClick={clearFilters} className="flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors">
-              <X className="w-3.5 h-3.5" /> Xóa bộ lọc
-            </button>
-          </div>
-        )}
-      </div>
+      <TransactionFilters
+        search={search} filterType={filterType} filterCategory={filterCategory}
+        filterMonthNum={filterMonthNum} filterYear={filterYear}
+        visibleCategories={visibleCategories} availableYears={availableYears}
+        filteredCount={filtered.length} totalCount={transactions.length}
+        onSearchChange={setSearch}
+        onTypeChange={(v) => { setFilterType(v); setFilterCategory("all"); }}
+        onCategoryChange={setFilterCategory}
+        onMonthChange={setFilterMonthNum}
+        onYearChange={setFilterYear}
+        onClear={clearFilters}
+      />
 
-      {/* Summary row */}
       <div className="grid grid-cols-2 gap-4">
         <div className="bg-green-50 dark:bg-green-900/20 rounded-xl px-4 py-3 flex items-center justify-between">
           <span className="text-sm text-green-700 dark:text-green-400 font-medium">Thu nhập</span>
@@ -240,57 +192,13 @@ export default function TransactionsClient({ initialTransactions, categories }: 
         </div>
       </div>
 
-      {/* Transaction list */}
-      <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 overflow-hidden">
-        {filtered.length === 0 ? (
-          <div className="py-16 text-center text-slate-400 dark:text-slate-500 text-sm">
-            {transactions.length === 0 ? "Chưa có giao dịch. Thêm giao dịch đầu tiên!" : "Không có giao dịch nào khớp với bộ lọc."}
-          </div>
-        ) : (
-          <div className="divide-y divide-slate-100 dark:divide-slate-700">
-            {filtered.map((t) => (
-              <div key={t.id} className="flex items-center justify-between px-5 py-3.5 hover:bg-slate-50 dark:hover:bg-slate-700/50 group transition-colors">
-                <div className="flex items-center gap-3 min-w-0">
-                  <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${t.type === "income" ? "bg-green-50 dark:bg-green-900/30" : "bg-red-50 dark:bg-red-900/30"}`}>
-                    {t.type === "income" ? <ArrowUpRight className="w-5 h-5 text-green-600" /> : <ArrowDownRight className="w-5 h-5 text-red-500" />}
-                  </div>
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-1.5">
-                      <p className="text-sm font-medium text-slate-800 dark:text-slate-200 truncate">{t.description}</p>
-                      {t.is_recurring && t.recurrence && (
-                        <span className="flex items-center gap-0.5 text-xs text-indigo-500 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/30 px-1.5 py-0.5 rounded-full flex-shrink-0">
-                          <RefreshCw className="w-2.5 h-2.5" />{RECURRENCE_LABELS[t.recurrence]}
-                        </span>
-                      )}
-                    </div>
-                    <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">
-                      {t.category?.name ?? "Không phân loại"} · {formatDate(t.date)}
-                      {t.next_occurrence && <span className="ml-1 text-indigo-400">· tiếp: {t.next_occurrence}</span>}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3 ml-4 flex-shrink-0">
-                  <span className={`text-sm font-semibold ${t.type === "income" ? "text-green-600" : "text-red-500"}`}>
-                    {t.type === "income" ? "+" : "-"}{fmt(t.amount)}
-                  </span>
-                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button onClick={() => { setEditing(t); setModalOpen(true); }}
-                      className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-600 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
-                    >
-                      <Pencil className="w-4 h-4" />
-                    </button>
-                    <button onClick={() => handleDelete(t.id)} disabled={deleting === t.id}
-                      className="p-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/30 text-slate-400 hover:text-red-500 transition-colors"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
+      <TransactionList
+        transactions={filtered}
+        allEmpty={transactions.length === 0}
+        deleting={deleting}
+        onEdit={(t) => { setEditing(t); setModalOpen(true); }}
+        onDelete={handleDelete}
+      />
 
       {modalOpen && (
         <TransactionModal

@@ -1,10 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { createClient } from "@/lib/supabase/client";
 import { Category, TransactionType } from "@/types";
 import { CATEGORY_COLORS } from "@/lib/utils";
 import { useCurrency } from "@/components/CurrencyProvider";
+import { upsertCategory, deleteCategory } from "@/app/actions/categories";
 import { Plus, Pencil, Trash2, X, Check } from "lucide-react";
 
 interface FormState {
@@ -25,7 +25,6 @@ export default function CategoriesClient({ initialCategories }: { initialCategor
   const [error, setError] = useState("");
   const { fmt } = useCurrency();
 
-  const supabase = createClient();
   const incomeCategories = categories.filter((c) => c.type === "income");
   const expenseCategories = categories.filter((c) => c.type === "expense");
 
@@ -45,25 +44,19 @@ export default function CategoriesClient({ initialCategories }: { initialCategor
     setLoading(true); setError("");
     const budgetVal = form.budget_limit && parseFloat(form.budget_limit) > 0 ? parseFloat(form.budget_limit) : null;
 
+    const result = await upsertCategory(editing, form.name, form.type, form.color, budgetVal);
+    if (!result.success) { setError(result.error); setLoading(false); return; }
     if (editing) {
-      const { data, error: err } = await supabase
-        .from("categories").update({ name: form.name.trim(), color: form.color, budget_limit: budgetVal })
-        .eq("id", editing).select().single();
-      if (err) { setError(err.message); setLoading(false); return; }
-      setCategories((prev) => prev.map((c) => (c.id === editing ? (data as Category) : c)));
+      setCategories((prev) => prev.map((c) => (c.id === editing ? result.data : c)));
     } else {
-      const { data, error: err } = await supabase
-        .from("categories").insert({ name: form.name.trim(), type: form.type, color: form.color, budget_limit: budgetVal })
-        .select().single();
-      if (err) { setError(err.message); setLoading(false); return; }
-      setCategories((prev) => [...prev, data as Category]);
+      setCategories((prev) => [...prev, result.data]);
     }
     setShowForm(false); setEditing(null); setForm(DEFAULT_FORM); setLoading(false);
   }
 
   async function handleDelete(id: string) {
     if (!confirm("Xóa danh mục này? Các giao dịch liên quan sẽ không được phân loại.")) return;
-    await supabase.from("categories").delete().eq("id", id);
+    await deleteCategory(id);
     setCategories((prev) => prev.filter((c) => c.id !== id));
   }
 

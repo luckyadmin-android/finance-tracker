@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { createClient } from "@/lib/supabase/client";
 import { Transaction, Category, TransactionType, RecurrenceType } from "@/types";
 import { calcNextOccurrence, RECURRENCE_LABELS } from "@/lib/utils";
+import { upsertTransaction } from "@/app/actions/transactions";
 import { X, RefreshCw } from "lucide-react";
 
 interface Props {
@@ -46,31 +46,18 @@ export default function TransactionModal({ transaction, categories, onClose, onS
     }
 
     setLoading(true);
-    const supabase = createClient();
-    const payload = {
+    const result = await upsertTransaction(
+      transaction?.id ?? null,
       type,
-      amount: parsed,
-      description: description.trim(),
-      category_id: categoryId || null,
+      parsed,
+      description,
+      categoryId || null,
       date,
-      is_recurring: isRecurring,
-      recurrence: isRecurring ? recurrence : null,
-      next_occurrence: isRecurring ? calcNextOccurrence(date, recurrence) : null,
-    };
-
-    if (transaction) {
-      const { data, error: err } = await supabase
-        .from("transactions").update(payload).eq("id", transaction.id)
-        .select("*, category:categories(*)").single();
-      if (err) { setError(err.message); setLoading(false); return; }
-      onSaved(data as Transaction);
-    } else {
-      const { data, error: err } = await supabase
-        .from("transactions").insert(payload)
-        .select("*, category:categories(*)").single();
-      if (err) { setError(err.message); setLoading(false); return; }
-      onSaved(data as Transaction);
-    }
+      isRecurring,
+      isRecurring ? recurrence : null
+    );
+    if (!result.success) { setError(result.error); setLoading(false); return; }
+    onSaved(result.data);
     onClose();
   }
 
