@@ -13,9 +13,15 @@ interface Props {
   onSaved: (transaction: Transaction) => void;
 }
 
+function fmtInput(raw: string): string {
+  const digits = raw.replace(/\D/g, "");
+  return digits.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+}
+
 export default function TransactionModal({ transaction, categories, onClose, onSaved }: Props) {
   const [type, setType] = useState<TransactionType>(transaction?.type ?? "expense");
-  const [amount, setAmount] = useState(transaction ? String(transaction.amount) : "");
+  const [rawAmount, setRawAmount] = useState(transaction ? String(transaction.amount) : "");
+  const [displayAmount, setDisplayAmount] = useState(transaction ? fmtInput(String(transaction.amount)) : "");
   const [description, setDescription] = useState(transaction?.description ?? "");
   const [categoryId, setCategoryId] = useState(transaction?.category_id ?? "");
   const [date, setDate] = useState(transaction?.date ?? new Date().toISOString().split("T")[0]);
@@ -33,7 +39,7 @@ export default function TransactionModal({ transaction, categories, onClose, onS
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
-    const parsed = parseFloat(amount);
+    const parsed = parseFloat(rawAmount);
     if (isNaN(parsed) || parsed <= 0) {
       setError("Vui lòng nhập số tiền hợp lệ lớn hơn 0.");
       return;
@@ -98,8 +104,12 @@ export default function TransactionModal({ transaction, categories, onClose, onS
           <div>
             <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Số tiền</label>
             <input
-              type="number" step="any" min="0.01" value={amount}
-              onChange={(e) => setAmount(e.target.value)} required
+              type="text" inputMode="numeric" value={displayAmount}
+              onChange={(e) => {
+                const digits = e.target.value.replace(/\D/g, "");
+                setRawAmount(digits);
+                setDisplayAmount(fmtInput(digits));
+              }} required
               className="w-full px-4 py-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
               placeholder="0"
             />

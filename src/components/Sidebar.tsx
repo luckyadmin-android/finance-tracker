@@ -4,9 +4,8 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { cn, CURRENCIES, type CurrencyCode } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import { useTheme } from "@/components/ThemeProvider";
-import { useCurrency } from "@/components/CurrencyProvider";
 import {
   TrendingUp, LayoutDashboard, ArrowLeftRight, Tag, Target,
   LogOut, Menu, X, Moon, Sun,
@@ -24,7 +23,6 @@ export default function Sidebar({ userEmail }: { userEmail: string }) {
   const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
   const { theme, toggle } = useTheme();
-  const { currency, setCurrency } = useCurrency();
 
   async function handleSignOut() {
     const supabase = createClient();
@@ -65,19 +63,6 @@ export default function Sidebar({ userEmail }: { userEmail: string }) {
       </nav>
 
       <div className="px-4 py-4 border-t border-slate-200 dark:border-slate-700 space-y-2">
-        <div className="px-3 py-1.5">
-          <label className="block text-xs text-slate-400 dark:text-slate-500 mb-1.5">Tiền tệ</label>
-          <select
-            value={currency}
-            onChange={(e) => setCurrency(e.target.value as CurrencyCode)}
-            className="w-full px-2 py-1.5 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          >
-            {(Object.entries(CURRENCIES) as [CurrencyCode, typeof CURRENCIES[CurrencyCode]][]).map(([code, cfg]) => (
-              <option key={code} value={code}>{cfg.label}</option>
-            ))}
-          </select>
-        </div>
-
         <button
           onClick={toggle}
           className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 hover:text-slate-900 dark:hover:text-white transition-all"

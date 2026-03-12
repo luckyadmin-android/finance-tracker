@@ -150,7 +150,7 @@ export default function CategoriesClient({ initialCategories }: { initialCategor
                   Hạn mức ngân sách / tháng <span className="text-slate-400 font-normal">(tuỳ chọn)</span>
                 </label>
                 <input type="number" value={form.budget_limit} onChange={(e) => setForm((f) => ({ ...f, budget_limit: e.target.value }))}
-                  min="0" step="any"
+                  min="0" step="1000"
                   className="w-full px-4 py-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
                   placeholder="Để trống nếu không giới hạn"
                 />

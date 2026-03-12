@@ -6,14 +6,13 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export type CurrencyCode = "USD" | "VND";
+export type CurrencyCode = "VND";
 
 export const CURRENCIES: Record<CurrencyCode, { label: string; symbol: string; locale: string; decimals: number }> = {
-  USD: { label: "USD ($)", symbol: "$", locale: "en-US", decimals: 2 },
   VND: { label: "VND (₫)", symbol: "₫", locale: "vi-VN", decimals: 0 },
 };
 
-export function formatCurrency(amount: number, currency: CurrencyCode = "USD"): string {
+export function formatCurrency(amount: number, currency: CurrencyCode = "VND"): string {
   const cfg = CURRENCIES[currency];
   return new Intl.NumberFormat(cfg.locale, {
     style: "currency",

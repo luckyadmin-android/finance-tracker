@@ -7,6 +7,11 @@ import { CATEGORY_COLORS } from "@/lib/utils";
 import { useCurrency } from "@/components/CurrencyProvider";
 import { Plus, Pencil, Trash2, X, Check, Target, Trophy, Calendar } from "lucide-react";
 
+function fmtInput(raw: string): string {
+  const digits = raw.replace(/\D/g, "");
+  return digits.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+}
+
 interface FormState {
   name: string;
   target_amount: string;
@@ -16,7 +21,7 @@ interface FormState {
 }
 
 const DEFAULT_FORM: FormState = {
-  name: "", target_amount: "", current_amount: "0",
+  name: "", target_amount: "", current_amount: "",
   color: CATEGORY_COLORS[0], deadline: "",
 };
 
@@ -40,8 +45,8 @@ export default function GoalsClient({ initialGoals }: { initialGoals: Goal[] }) 
     setEditingId(goal.id);
     setForm({
       name: goal.name,
-      target_amount: String(goal.target_amount),
-      current_amount: String(goal.current_amount),
+      target_amount: fmtInput(String(goal.target_amount)),
+      current_amount: fmtInput(String(goal.current_amount)),
       color: goal.color,
       deadline: goal.deadline ?? "",
     });
@@ -50,8 +55,8 @@ export default function GoalsClient({ initialGoals }: { initialGoals: Goal[] }) 
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    const target = parseFloat(form.target_amount);
-    const current = parseFloat(form.current_amount) || 0;
+    const target = parseFloat(form.target_amount.replace(/\./g, ""));
+    const current = parseFloat(form.current_amount.replace(/\./g, "")) || 0;
     if (isNaN(target) || target <= 0) { setError("Nhập số tiền mục tiêu hợp lệ."); return; }
     setLoading(true); setError("");
 
@@ -78,7 +83,7 @@ export default function GoalsClient({ initialGoals }: { initialGoals: Goal[] }) 
   }
 
   async function handleAddAmount(goalId: string) {
-    const amount = parseFloat(addAmount);
+    const amount = parseFloat(addAmount.replace(/\./g, ""));
     if (isNaN(amount) || amount <= 0) return;
     const goal = goals.find((g) => g.id === goalId)!;
     const newAmount = Math.min(goal.current_amount + amount, goal.target_amount);
@@ -131,15 +136,17 @@ export default function GoalsClient({ initialGoals }: { initialGoals: Goal[] }) 
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Số tiền mục tiêu</label>
-                <input type="number" value={form.target_amount} onChange={(e) => setForm((f) => ({ ...f, target_amount: e.target.value }))}
-                  required min="1" step="any" placeholder="0"
+                <input type="text" inputMode="numeric" value={form.target_amount}
+                  onChange={(e) => setForm((f) => ({ ...f, target_amount: fmtInput(e.target.value) }))}
+                  required placeholder="0"
                   className="w-full px-4 py-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
                 />
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Đã tiết kiệm được</label>
-                <input type="number" value={form.current_amount} onChange={(e) => setForm((f) => ({ ...f, current_amount: e.target.value }))}
-                  min="0" step="any" placeholder="0"
+                <input type="text" inputMode="numeric" value={form.current_amount}
+                  onChange={(e) => setForm((f) => ({ ...f, current_amount: fmtInput(e.target.value) }))}
+                  placeholder="0"
                   className="w-full px-4 py-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
                 />
               </div>
@@ -250,9 +257,10 @@ export default function GoalsClient({ initialGoals }: { initialGoals: Goal[] }) 
                   addAmountId === goal.id ? (
                     <div className="flex gap-2">
                       <input
-                        type="number" value={addAmount} onChange={(e) => setAddAmount(e.target.value)}
+                        type="text" inputMode="numeric" value={addAmount}
+                        onChange={(e) => setAddAmount(fmtInput(e.target.value))}
                         onKeyDown={(e) => e.key === "Enter" && handleAddAmount(goal.id)}
-                        autoFocus min="0" step="any" placeholder="Nhập số tiền..."
+                        autoFocus placeholder="Nhập số tiền..."
                         className="flex-1 px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                       />
                       <button onClick={() => handleAddAmount(goal.id)}
