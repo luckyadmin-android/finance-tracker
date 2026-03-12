@@ -6,14 +6,11 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export type CurrencyCode = "USD" | "VND" | "EUR" | "GBP" | "JPY";
+export type CurrencyCode = "USD" | "VND";
 
 export const CURRENCIES: Record<CurrencyCode, { label: string; symbol: string; locale: string; decimals: number }> = {
   USD: { label: "USD ($)", symbol: "$", locale: "en-US", decimals: 2 },
   VND: { label: "VND (₫)", symbol: "₫", locale: "vi-VN", decimals: 0 },
-  EUR: { label: "EUR (€)", symbol: "€", locale: "de-DE", decimals: 2 },
-  GBP: { label: "GBP (£)", symbol: "£", locale: "en-GB", decimals: 2 },
-  JPY: { label: "JPY (¥)", symbol: "¥", locale: "ja-JP", decimals: 0 },
 };
 
 export function formatCurrency(amount: number, currency: CurrencyCode = "USD"): string {
