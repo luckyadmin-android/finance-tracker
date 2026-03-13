@@ -4,10 +4,10 @@ import { useState } from "react";
 import { Goal } from "@/types";
 import { upsertGoal, addGoalAmount, deleteGoal } from "@/app/actions/goals";
 import GoalForm, { GoalFormState, DEFAULT_GOAL_FORM, goalFormFromGoal } from "@/components/GoalForm";
-
-const MAX_AMOUNT = 999_999_999_999_999;
 import GoalCard from "@/components/GoalCard";
 import { Plus, Target } from "lucide-react";
+
+const MAX_AMOUNT = 999_999_999_999_999;
 
 export default function GoalsClient({ initialGoals }: { initialGoals: Goal[] }) {
   const [goals, setGoals] = useState(initialGoals);

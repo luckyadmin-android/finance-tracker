@@ -121,6 +121,7 @@ A Postgres trigger `on_auth_user_created` fires on `auth.users` INSERT and seeds
 - **All amount inputs enforce multiples of 1,000₫** — validation blocks submit and shows an error if not divisible by 1000.
 - A live hint displays below amount fields once the value reaches ≥ 1,000 (e.g. `= 1.500.000₫`). If ≥ 1,000,000 a triệu label is shown; if ≥ 1,000,000,000 the label switches to tỉ.
 - `amountHint(formatted: string)` is a shared helper duplicated in each component file (GoalForm, GoalCard, CategoriesClient). Keep it consistent if updating.
+- `MAX_AMOUNT = 999_999_999_999_999` (15 digits) is the input cap — safely under `Number.MAX_SAFE_INTEGER`. Defined in each file that runs validation (GoalCard, GoalsClient, CategoriesClient, TransactionModal). `fmtInput()` also slices raw digits to 15 to prevent typing beyond this limit.
 
 ### Dark Mode
 - Controlled by `ThemeProvider` context — toggles `dark` class on `<html>`.
