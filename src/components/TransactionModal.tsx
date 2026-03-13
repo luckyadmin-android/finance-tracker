@@ -13,8 +13,10 @@ interface Props {
   onSaved: (transaction: Transaction) => void;
 }
 
+const MAX_AMOUNT = 999_999_999_999_999;
+
 function fmtInput(raw: string): string {
-  const digits = raw.replace(/\D/g, "");
+  const digits = raw.replace(/\D/g, "").slice(0, 15);
   return digits.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 }
 
@@ -42,6 +44,10 @@ export default function TransactionModal({ transaction, categories, onClose, onS
     const parsed = parseFloat(rawAmount);
     if (isNaN(parsed) || parsed <= 0) {
       setError("Vui lòng nhập số tiền hợp lệ lớn hơn 0.");
+      return;
+    }
+    if (parsed > MAX_AMOUNT) {
+      setError("Số tiền vượt quá giới hạn cho phép.");
       return;
     }
     if (parsed % 1000 !== 0) {
@@ -97,7 +103,7 @@ export default function TransactionModal({ transaction, categories, onClose, onS
             <input
               type="text" inputMode="numeric" value={displayAmount}
               onChange={(e) => {
-                const digits = e.target.value.replace(/\D/g, "");
+                const digits = e.target.value.replace(/\D/g, "").slice(0, 15);
                 setRawAmount(digits);
                 setDisplayAmount(fmtInput(digits));
               }} required

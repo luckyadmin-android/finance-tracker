@@ -5,8 +5,10 @@ import { Goal } from "@/types";
 import { useCurrency } from "@/components/CurrencyProvider";
 import { Pencil, Trash2, Target, Trophy, Calendar } from "lucide-react";
 
+const MAX_AMOUNT = 999_999_999_999_999;
+
 function fmtInput(raw: string): string {
-  const digits = raw.replace(/\D/g, "");
+  const digits = raw.replace(/\D/g, "").slice(0, 15);
   return digits.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 }
 
@@ -39,6 +41,7 @@ export default function GoalCard({ goal, onEdit, onDelete, onAddAmount }: Props)
   function handleAdd() {
     const amount = parseFloat(addAmount.replace(/\./g, ""));
     if (isNaN(amount) || amount <= 0) { setAddError("Vui lòng nhập số tiền hợp lệ."); return; }
+    if (amount > MAX_AMOUNT) { setAddError("Số tiền vượt quá giới hạn cho phép."); return; }
     if (amount % 1000 !== 0) { setAddError("Số tiền phải là bội số của 1.000₫."); return; }
     setAddError("");
     onAddAmount(goal.id, amount);

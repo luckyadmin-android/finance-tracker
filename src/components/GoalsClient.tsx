@@ -4,6 +4,8 @@ import { useState } from "react";
 import { Goal } from "@/types";
 import { upsertGoal, addGoalAmount, deleteGoal } from "@/app/actions/goals";
 import GoalForm, { GoalFormState, DEFAULT_GOAL_FORM, goalFormFromGoal } from "@/components/GoalForm";
+
+const MAX_AMOUNT = 999_999_999_999_999;
 import GoalCard from "@/components/GoalCard";
 import { Plus, Target } from "lucide-react";
 
@@ -28,7 +30,9 @@ export default function GoalsClient({ initialGoals }: { initialGoals: Goal[] }) 
     const target = parseFloat(form.target_amount.replace(/\./g, ""));
     const current = parseFloat(form.current_amount.replace(/\./g, "")) || 0;
     if (isNaN(target) || target <= 0) { setError("Vui lòng nhập số tiền mục tiêu hợp lệ."); return; }
+    if (target > MAX_AMOUNT) { setError("Số tiền vượt quá giới hạn cho phép."); return; }
     if (target % 1000 !== 0) { setError("Số tiền mục tiêu phải là bội số của 1.000₫."); return; }
+    if (current > 0 && current > MAX_AMOUNT) { setError("Số tiền đã tiết kiệm vượt quá giới hạn cho phép."); return; }
     if (current > 0 && current % 1000 !== 0) { setError("Số tiền đã tiết kiệm phải là bội số của 1.000₫."); return; }
     setLoading(true); setError("");
 

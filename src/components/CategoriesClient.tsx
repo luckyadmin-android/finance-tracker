@@ -7,8 +7,10 @@ import { useCurrency } from "@/components/CurrencyProvider";
 import { upsertCategory, deleteCategory } from "@/app/actions/categories";
 import { Plus, Pencil, Trash2, X, Check } from "lucide-react";
 
+const MAX_AMOUNT = 999_999_999_999_999;
+
 function fmtInput(raw: string): string {
-  const digits = raw.replace(/\D/g, "");
+  const digits = raw.replace(/\D/g, "").slice(0, 15);
   return digits.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 }
 
@@ -62,6 +64,7 @@ export default function CategoriesClient({ initialCategories }: { initialCategor
     e.preventDefault();
     if (!form.name.trim()) return;
     const budgetRaw = parseFloat(form.budget_limit.replace(/\./g, "")) || 0;
+    if (budgetRaw > MAX_AMOUNT) { setError("Số tiền vượt quá giới hạn cho phép."); return; }
     if (budgetRaw > 0 && budgetRaw % 1000 !== 0) { setError("Hạn mức ngân sách phải là bội số của 1.000₫."); return; }
     setLoading(true); setError("");
     const budgetVal = budgetRaw > 0 ? budgetRaw : null;
