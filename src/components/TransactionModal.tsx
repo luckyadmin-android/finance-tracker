@@ -44,6 +44,10 @@ export default function TransactionModal({ transaction, categories, onClose, onS
       setError("Vui lòng nhập số tiền hợp lệ lớn hơn 0.");
       return;
     }
+    if (parsed % 1000 !== 0) {
+      setError("Số tiền phải là bội số của 1.000₫.");
+      return;
+    }
 
     setLoading(true);
     const result = await upsertTransaction(
@@ -100,6 +104,16 @@ export default function TransactionModal({ transaction, categories, onClose, onS
               className="w-full px-4 py-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
               placeholder="0"
             />
+            {(() => {
+              const n = parseFloat(rawAmount) || 0;
+              if (n < 1000) return null;
+              return (
+                <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">
+                  = {n.toLocaleString("vi-VN")}₫
+                  {n >= 1_000_000 && <span className="ml-1 text-indigo-400">({(n / 1_000_000).toLocaleString("vi-VN", { maximumFractionDigits: 2 })} triệu)</span>}
+                </p>
+              );
+            })()}
           </div>
 
           <div>

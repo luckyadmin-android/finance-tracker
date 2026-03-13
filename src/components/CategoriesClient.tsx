@@ -7,6 +7,22 @@ import { useCurrency } from "@/components/CurrencyProvider";
 import { upsertCategory, deleteCategory } from "@/app/actions/categories";
 import { Plus, Pencil, Trash2, X, Check } from "lucide-react";
 
+function fmtInput(raw: string): string {
+  const digits = raw.replace(/\D/g, "");
+  return digits.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+}
+
+function amountHint(formatted: string) {
+  const n = parseFloat(formatted.replace(/\./g, "")) || 0;
+  if (n < 1000) return null;
+  return (
+    <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">
+      = {n.toLocaleString("vi-VN")}₫
+      {n >= 1_000_000 && <span className="ml-1 text-indigo-400">({(n / 1_000_000).toLocaleString("vi-VN", { maximumFractionDigits: 2 })} triệu)</span>}
+    </p>
+  );
+}
+
 interface FormState {
   name: string;
   type: TransactionType;
@@ -34,17 +50,19 @@ export default function CategoriesClient({ initialCategories }: { initialCategor
 
   function startEdit(cat: Category) {
     setEditing(cat.id);
-    setForm({ name: cat.name, type: cat.type, color: cat.color, budget_limit: cat.budget_limit ? String(cat.budget_limit) : "" });
+    setForm({ name: cat.name, type: cat.type, color: cat.color, budget_limit: cat.budget_limit ? fmtInput(String(cat.budget_limit)) : "" });
     setError(""); setShowForm(true);
   }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!form.name.trim()) return;
+    const budgetRaw = parseFloat(form.budget_limit.replace(/\./g, "")) || 0;
+    if (budgetRaw > 0 && budgetRaw % 1000 !== 0) { setError("Hạn mức ngân sách phải là bội số của 1.000₫."); return; }
     setLoading(true); setError("");
-    const budgetVal = form.budget_limit && parseFloat(form.budget_limit) > 0 ? parseFloat(form.budget_limit) : null;
+    const budgetVal = budgetRaw > 0 ? budgetRaw : null;
 
-    const result = await upsertCategory(editing, form.name, form.type, form.color, budgetVal);
+    const result = await upsertCategory(editing, form.name, form.type, form.color, budgetVal ?? null);
     if (!result.success) { setError(result.error); setLoading(false); return; }
     if (editing) {
       setCategories((prev) => prev.map((c) => (c.id === editing ? result.data : c)));
@@ -142,11 +160,12 @@ export default function CategoriesClient({ initialCategories }: { initialCategor
                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
                   Hạn mức ngân sách / tháng <span className="text-slate-400 font-normal">(tuỳ chọn)</span>
                 </label>
-                <input type="number" value={form.budget_limit} onChange={(e) => setForm((f) => ({ ...f, budget_limit: e.target.value }))}
-                  min="0" step="1000"
+                <input type="text" inputMode="numeric" value={form.budget_limit}
+                  onChange={(e) => setForm((f) => ({ ...f, budget_limit: fmtInput(e.target.value) }))}
                   className="w-full px-4 py-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
                   placeholder="Để trống nếu không giới hạn"
                 />
+                {amountHint(form.budget_limit)}
               </div>
             )}
 

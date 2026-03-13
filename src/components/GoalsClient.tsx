@@ -27,6 +27,9 @@ export default function GoalsClient({ initialGoals }: { initialGoals: Goal[] }) 
     e.preventDefault();
     const target = parseFloat(form.target_amount.replace(/\./g, ""));
     const current = parseFloat(form.current_amount.replace(/\./g, "")) || 0;
+    if (isNaN(target) || target <= 0) { setError("Vui lòng nhập số tiền mục tiêu hợp lệ."); return; }
+    if (target % 1000 !== 0) { setError("Số tiền mục tiêu phải là bội số của 1.000₫."); return; }
+    if (current > 0 && current % 1000 !== 0) { setError("Số tiền đã tiết kiệm phải là bội số của 1.000₫."); return; }
     setLoading(true); setError("");
 
     const result = await upsertGoal(editingId, form.name, target, current, form.color, form.deadline || null);

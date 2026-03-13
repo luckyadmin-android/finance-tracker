@@ -9,6 +9,17 @@ function fmtInput(raw: string): string {
   return digits.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 }
 
+function amountHint(formatted: string) {
+  const n = parseFloat(formatted.replace(/\./g, "")) || 0;
+  if (n < 1000) return null;
+  return (
+    <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">
+      = {n.toLocaleString("vi-VN")}₫
+      {n >= 1_000_000 && <span className="ml-1 text-indigo-400">({(n / 1_000_000).toLocaleString("vi-VN", { maximumFractionDigits: 2 })} triệu)</span>}
+    </p>
+  );
+}
+
 export interface GoalFormState {
   name: string;
   target_amount: string;
@@ -67,6 +78,7 @@ export default function GoalForm({ form, isEditing, loading, error, onChange, on
               required placeholder="0"
               className="w-full px-4 py-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
             />
+            {amountHint(form.target_amount)}
           </div>
           <div>
             <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Đã tiết kiệm được</label>
@@ -75,6 +87,7 @@ export default function GoalForm({ form, isEditing, loading, error, onChange, on
               placeholder="0"
               className="w-full px-4 py-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
             />
+            {amountHint(form.current_amount)}
           </div>
         </div>
         <div>

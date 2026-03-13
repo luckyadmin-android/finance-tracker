@@ -25,6 +25,7 @@ interface Props {
 export default function GoalCard({ goal, onEdit, onDelete, onAddAmount }: Props) {
   const [addingAmount, setAddingAmount] = useState(false);
   const [addAmount, setAddAmount] = useState("");
+  const [addError, setAddError] = useState("");
   const { fmt } = useCurrency();
 
   const pct = Math.min((goal.current_amount / goal.target_amount) * 100, 100);
@@ -33,12 +34,21 @@ export default function GoalCard({ goal, onEdit, onDelete, onAddAmount }: Props)
   const days = goal.deadline ? daysUntil(goal.deadline) : null;
   const overdue = days !== null && days < 0;
 
+  const parsedAmount = parseFloat(addAmount.replace(/\./g, "")) || 0;
+
   function handleAdd() {
     const amount = parseFloat(addAmount.replace(/\./g, ""));
-    if (isNaN(amount) || amount <= 0) return;
+    if (isNaN(amount) || amount <= 0) { setAddError("Vui lòng nhập số tiền hợp lệ."); return; }
+    if (amount % 1000 !== 0) { setAddError("Số tiền phải là bội số của 1.000₫."); return; }
+    setAddError("");
     onAddAmount(goal.id, amount);
     setAddingAmount(false);
     setAddAmount("");
+  }
+
+  function handleAmountChange(e: React.ChangeEvent<HTMLInputElement>) {
+    setAddAmount(fmtInput(e.target.value));
+    setAddError("");
   }
 
   return (
@@ -94,18 +104,27 @@ export default function GoalCard({ goal, onEdit, onDelete, onAddAmount }: Props)
 
       {!done && (
         addingAmount ? (
-          <div className="flex gap-2">
-            <input
-              type="text" inputMode="numeric" value={addAmount}
-              onChange={(e) => setAddAmount(fmtInput(e.target.value))}
-              onKeyDown={(e) => e.key === "Enter" && handleAdd()}
-              autoFocus placeholder="Nhập số tiền..."
-              className="flex-1 px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            />
-            <button onClick={handleAdd} className="px-3 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium">Thêm</button>
-            <button onClick={() => { setAddingAmount(false); setAddAmount(""); }}
-              className="px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-600 text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-700 text-sm"
-            >Hủy</button>
+          <div className="space-y-2">
+            <div className="flex gap-2">
+              <input
+                type="text" inputMode="numeric" value={addAmount}
+                onChange={handleAmountChange}
+                onKeyDown={(e) => e.key === "Enter" && handleAdd()}
+                autoFocus placeholder="Nhập số tiền (bội số 1.000)..."
+                className={`flex-1 px-3 py-2 rounded-lg border bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 ${addError ? "border-red-400 dark:border-red-500" : "border-slate-300 dark:border-slate-600"}`}
+              />
+              <button onClick={handleAdd} className="px-3 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium">Thêm</button>
+              <button onClick={() => { setAddingAmount(false); setAddAmount(""); setAddError(""); }}
+                className="px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-600 text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-700 text-sm"
+              >Hủy</button>
+            </div>
+            {addError && <p className="text-xs text-red-500">{addError}</p>}
+            {!addError && parsedAmount >= 1000 && (
+              <p className="text-xs text-slate-400 dark:text-slate-500">
+                = {fmt(parsedAmount)}
+                {parsedAmount >= 1_000_000 && <span className="ml-1 text-indigo-400">({(parsedAmount / 1_000_000).toLocaleString("vi-VN", { maximumFractionDigits: 2 })} triệu)</span>}
+              </p>
+            )}
           </div>
         ) : (
           <button
