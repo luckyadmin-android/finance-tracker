@@ -5,7 +5,7 @@ import { CATEGORY_COLORS } from "@/lib/utils";
 import { X, Check } from "lucide-react";
 
 function fmtInput(raw: string): string {
-  const digits = raw.replace(/\D/g, "").slice(0, 15);
+  const digits = raw.replace(/\D/g, "").slice(0, 12);
   return digits.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 }
 

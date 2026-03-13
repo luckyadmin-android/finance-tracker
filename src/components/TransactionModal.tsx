@@ -13,10 +13,10 @@ interface Props {
   onSaved: (transaction: Transaction) => void;
 }
 
-const MAX_AMOUNT = 999_999_999_999_999;
+const MAX_AMOUNT = 999_999_999_999;
 
 function fmtInput(raw: string): string {
-  const digits = raw.replace(/\D/g, "").slice(0, 15);
+  const digits = raw.replace(/\D/g, "").slice(0, 12);
   return digits.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 }
 
@@ -103,7 +103,7 @@ export default function TransactionModal({ transaction, categories, onClose, onS
             <input
               type="text" inputMode="numeric" value={displayAmount}
               onChange={(e) => {
-                const digits = e.target.value.replace(/\D/g, "").slice(0, 15);
+                const digits = e.target.value.replace(/\D/g, "").slice(0, 12);
                 setRawAmount(digits);
                 setDisplayAmount(fmtInput(digits));
               }} required

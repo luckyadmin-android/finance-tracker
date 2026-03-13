@@ -5,10 +5,10 @@ import { Goal } from "@/types";
 import { useCurrency } from "@/components/CurrencyProvider";
 import { Pencil, Trash2, Target, Trophy, Calendar } from "lucide-react";
 
-const MAX_AMOUNT = 999_999_999_999_999;
+const MAX_AMOUNT = 999_999_999_999;
 
 function fmtInput(raw: string): string {
-  const digits = raw.replace(/\D/g, "").slice(0, 15);
+  const digits = raw.replace(/\D/g, "").slice(0, 12);
   return digits.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 }
 

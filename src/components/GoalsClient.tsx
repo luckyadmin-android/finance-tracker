@@ -7,7 +7,7 @@ import GoalForm, { GoalFormState, DEFAULT_GOAL_FORM, goalFormFromGoal } from "@/
 import GoalCard from "@/components/GoalCard";
 import { Plus, Target } from "lucide-react";
 
-const MAX_AMOUNT = 999_999_999_999_999;
+const MAX_AMOUNT = 999_999_999_999;
 
 export default function GoalsClient({ initialGoals }: { initialGoals: Goal[] }) {
   const [goals, setGoals] = useState(initialGoals);

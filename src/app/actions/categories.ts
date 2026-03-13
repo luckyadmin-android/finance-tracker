@@ -13,7 +13,7 @@ function validateCategoryInput(name: string, color: string, budgetLimit: number 
   if (name.trim().length > 40) return "Tên không được quá 40 ký tự.";
   if (!CATEGORY_COLORS.includes(color)) return "Màu sắc không hợp lệ.";
   if (budgetLimit !== null && (isNaN(budgetLimit) || budgetLimit < 0)) return "Hạn mức ngân sách không hợp lệ.";
-  if (budgetLimit !== null && budgetLimit > 999_999_999_999_999) return "Hạn mức ngân sách quá lớn.";
+  if (budgetLimit !== null && budgetLimit > 999_999_999_999) return "Hạn mức ngân sách quá lớn.";
   return null;
 }
 
