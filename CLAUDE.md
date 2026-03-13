@@ -85,7 +85,7 @@ All tables have `user_id uuid references auth.users` with RLS enabled.
 | budget_limit | numeric | nullable — monthly budget |
 | created_at | timestamptz | |
 
-### `categories`
+### `goals`
 | Column | Type | Notes |
 |---|---|---|
 | id | uuid | PK |
@@ -117,7 +117,10 @@ A Postgres trigger `on_auth_user_created` fires on `auth.users` INSERT and seeds
 ### Currency
 - Only VND is supported. All amounts are integers (no decimals).
 - Use `useCurrency()` hook to get `fmt(amount)` which calls `formatCurrency(n, "VND")` from utils.
-- Money inputs use dot separators (e.g. `1.000.000`) — the `fmtInput()` helper in modals handles this.
+- Money inputs use dot separators (e.g. `1.000.000`) — the `fmtInput()` helper formats digits as-you-type.
+- **All amount inputs enforce multiples of 1,000₫** — validation blocks submit and shows an error if not divisible by 1000.
+- A live hint displays below amount fields once the value reaches ≥ 1,000 (e.g. `= 1.500.000₫`). If ≥ 1,000,000 a triệu label is shown; if ≥ 1,000,000,000 the label switches to tỉ.
+- `amountHint(formatted: string)` is a shared helper duplicated in each component file (GoalForm, GoalCard, CategoriesClient). Keep it consistent if updating.
 
 ### Dark Mode
 - Controlled by `ThemeProvider` context — toggles `dark` class on `<html>`.
@@ -144,7 +147,9 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=...
 - Vietnamese UI text throughout — keep all user-facing strings in Vietnamese.
 - Prefer server actions over client-side Supabase calls for any data mutation.
 - Server actions always verify `auth.getUser()` and use `.eq("user_id", user.id)` on updates/deletes.
-- Input validation happens in server actions before any DB call.
+- Input validation happens in server actions before any DB call. Client-side validation (e.g. divisibility) is also added as a UX guard but is not a substitute for server-side checks.
 - Components are split by concern — avoid files over ~150 lines.
 - No `date-fns` — use native `Date` APIs.
+- All amount inputs must enforce multiples of 1,000₫ with a visible error and a live VND hint.
+- `CurrencyProvider` only exposes `fmt(amount: number): string` — there is no currency switcher or `setCurrency`.
 - Git remote: `https://github.com/luckyadmin-android/finance-tracker.git`, branch `master`.

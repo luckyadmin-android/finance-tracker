@@ -110,7 +110,11 @@ export default function TransactionModal({ transaction, categories, onClose, onS
               return (
                 <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">
                   = {n.toLocaleString("vi-VN")}₫
-                  {n >= 1_000_000 && <span className="ml-1 text-indigo-400">({(n / 1_000_000).toLocaleString("vi-VN", { maximumFractionDigits: 2 })} triệu)</span>}
+                  {n >= 1_000_000_000
+                    ? <span className="ml-1 text-indigo-400">({(n / 1_000_000_000).toLocaleString("vi-VN", { maximumFractionDigits: 2 })} tỉ)</span>
+                    : n >= 1_000_000
+                      ? <span className="ml-1 text-indigo-400">({(n / 1_000_000).toLocaleString("vi-VN", { maximumFractionDigits: 2 })} triệu)</span>
+                      : null}
                 </p>
               );
             })()}

@@ -122,7 +122,11 @@ export default function GoalCard({ goal, onEdit, onDelete, onAddAmount }: Props)
             {!addError && parsedAmount >= 1000 && (
               <p className="text-xs text-slate-400 dark:text-slate-500">
                 = {fmt(parsedAmount)}
-                {parsedAmount >= 1_000_000 && <span className="ml-1 text-indigo-400">({(parsedAmount / 1_000_000).toLocaleString("vi-VN", { maximumFractionDigits: 2 })} triệu)</span>}
+                {parsedAmount >= 1_000_000_000
+                ? <span className="ml-1 text-indigo-400">({(parsedAmount / 1_000_000_000).toLocaleString("vi-VN", { maximumFractionDigits: 2 })} tỉ)</span>
+                : parsedAmount >= 1_000_000
+                  ? <span className="ml-1 text-indigo-400">({(parsedAmount / 1_000_000).toLocaleString("vi-VN", { maximumFractionDigits: 2 })} triệu)</span>
+                  : null}
               </p>
             )}
           </div>
