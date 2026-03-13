@@ -12,7 +12,7 @@ function validateGoalInput(name: string, targetAmount: number, currentAmount: nu
   if (!name.trim()) return "Tên mục tiêu không được để trống.";
   if (name.trim().length > 60) return "Tên không được quá 60 ký tự.";
   if (isNaN(targetAmount) || targetAmount <= 0) return "Số tiền mục tiêu phải lớn hơn 0.";
-  if (targetAmount > 999_999_999_999) return "Số tiền mục tiêu quá lớn.";
+  if (targetAmount > 999_999_999_999_999) return "Số tiền mục tiêu quá lớn.";
   if (isNaN(currentAmount) || currentAmount < 0) return "Số tiền đã tiết kiệm không hợp lệ.";
   if (currentAmount > targetAmount) return "Số tiền đã tiết kiệm không được vượt quá mục tiêu.";
   if (!CATEGORY_COLORS.includes(color)) return "Màu sắc không hợp lệ.";

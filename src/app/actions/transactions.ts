@@ -19,7 +19,7 @@ function validateTransactionInput(formData: {
 }): string | null {
   if (!["income", "expense"].includes(formData.type)) return "Loại giao dịch không hợp lệ.";
   if (isNaN(formData.amount) || formData.amount <= 0) return "Số tiền phải lớn hơn 0.";
-  if (formData.amount > 999_999_999_999) return "Số tiền quá lớn.";
+  if (formData.amount > 999_999_999_999_999) return "Số tiền quá lớn.";
   if (!formData.description.trim()) return "Vui lòng nhập mô tả.";
   if (formData.description.trim().length > 100) return "Mô tả không được quá 100 ký tự.";
   if (!/^\d{4}-\d{2}-\d{2}$/.test(formData.date)) return "Ngày không hợp lệ.";
