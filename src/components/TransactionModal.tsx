@@ -71,26 +71,30 @@ export default function TransactionModal({ transaction, categories, onClose, onS
     onClose();
   }
 
+  const inputClass = "w-full px-4 py-3 rounded-xl border border-border bg-surface-primary text-content-primary text-sm focus-ring placeholder:text-content-muted transition-colors";
+  const labelClass = "block text-sm font-medium text-content-secondary mb-2";
+
   return (
-    <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
-      <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-700">
-          <h2 className="font-semibold text-slate-900 dark:text-white">
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div className="glass-card !shadow-card-lg w-full max-w-md max-h-[90vh] overflow-y-auto">
+        <div className="flex items-center justify-between px-6 py-5 border-b border-border">
+          <h2 className="font-semibold font-display text-content-primary text-lg">
             {transaction ? "Sửa giao dịch" : "Thêm giao dịch"}
           </h2>
-          <button onClick={onClose} className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-400 transition-colors">
+          <button onClick={onClose} className="p-2 rounded-xl hover:bg-accent-soft text-content-muted transition-colors">
             <X className="w-5 h-5" />
           </button>
         </div>
 
         <form onSubmit={handleSubmit} className="px-6 py-5 space-y-4">
-          <div className="flex rounded-xl border border-slate-200 dark:border-slate-600 overflow-hidden">
+          {/* Type toggle */}
+          <div className="flex rounded-xl border border-border overflow-hidden">
             {(["expense", "income"] as TransactionType[]).map((t) => (
               <button key={t} type="button" onClick={() => setType(t)}
-                className={`flex-1 py-2.5 text-sm font-medium capitalize transition-colors ${
+                className={`flex-1 py-3 text-sm font-semibold transition-all ${
                   type === t
-                    ? t === "income" ? "bg-green-600 text-white" : "bg-red-500 text-white"
-                    : "bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700"
+                    ? t === "income" ? "bg-income text-white" : "bg-expense text-white"
+                    : "bg-surface-primary text-content-muted hover:text-content-secondary"
                 }`}
               >
                 {t === "income" ? "Thu nhập" : "Chi tiêu"}
@@ -98,8 +102,9 @@ export default function TransactionModal({ transaction, categories, onClose, onS
             ))}
           </div>
 
+          {/* Amount */}
           <div>
-            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Số tiền</label>
+            <label className={labelClass}>Số tiền</label>
             <input
               type="text" inputMode="numeric" value={displayAmount}
               onChange={(e) => {
@@ -107,100 +112,99 @@ export default function TransactionModal({ transaction, categories, onClose, onS
                 setRawAmount(digits);
                 setDisplayAmount(fmtInput(digits));
               }} required
-              className="w-full px-4 py-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+              className={inputClass}
               placeholder="0"
             />
             {(() => {
               const n = parseFloat(rawAmount) || 0;
               if (n < 1000) return null;
               return (
-                <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">
+                <p className="text-xs text-content-muted mt-1.5">
                   = {n.toLocaleString("vi-VN")}₫
                   {n >= 1_000_000_000
-                    ? <span className="ml-1 text-indigo-400">({(n / 1_000_000_000).toLocaleString("vi-VN", { maximumFractionDigits: 2 })} tỉ)</span>
+                    ? <span className="ml-1 text-accent">({(n / 1_000_000_000).toLocaleString("vi-VN", { maximumFractionDigits: 2 })} tỉ)</span>
                     : n >= 1_000_000
-                      ? <span className="ml-1 text-indigo-400">({(n / 1_000_000).toLocaleString("vi-VN", { maximumFractionDigits: 2 })} triệu)</span>
+                      ? <span className="ml-1 text-accent">({(n / 1_000_000).toLocaleString("vi-VN", { maximumFractionDigits: 2 })} triệu)</span>
                       : null}
                 </p>
               );
             })()}
           </div>
 
+          {/* Description */}
           <div>
-            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Mô tả</label>
+            <label className={labelClass}>Mô tả</label>
             <input
               type="text" value={description} onChange={(e) => setDescription(e.target.value)}
-              required maxLength={100}
-              className="w-full px-4 py-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+              required maxLength={100} className={inputClass}
               placeholder="vd. Mua sắm tạp hóa"
             />
           </div>
 
+          {/* Category + Date */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Danh mục</label>
+              <label className={labelClass}>Danh mục</label>
               <select value={categoryId} onChange={(e) => setCategoryId(e.target.value)}
-                className="w-full px-3 py-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+                className={inputClass + " appearance-none cursor-pointer"}
               >
                 <option value="">Không có</option>
                 {filteredCategories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Ngày</label>
-              <input type="date" value={date} onChange={(e) => setDate(e.target.value)} required
-                className="w-full px-3 py-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
-              />
+              <label className={labelClass}>Ngày</label>
+              <input type="date" value={date} onChange={(e) => setDate(e.target.value)} required className={inputClass} />
             </div>
           </div>
 
           {/* Recurring */}
-          <div className="rounded-xl border border-slate-200 dark:border-slate-600 p-3.5 space-y-3">
+          <div className="rounded-xl border border-border p-4 space-y-3">
             <label className="flex items-center gap-3 cursor-pointer">
               <div className="relative">
                 <input type="checkbox" className="sr-only" checked={isRecurring} onChange={(e) => setIsRecurring(e.target.checked)} />
-                <div className={`w-10 h-5 rounded-full transition-colors ${isRecurring ? "bg-indigo-600" : "bg-slate-300 dark:bg-slate-600"}`} />
+                <div className={`w-10 h-5 rounded-full transition-colors ${isRecurring ? "bg-accent" : "bg-border"}`} />
                 <div className={`absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform ${isRecurring ? "translate-x-5" : ""}`} />
               </div>
               <div className="flex items-center gap-2">
-                <RefreshCw className={`w-4 h-4 ${isRecurring ? "text-indigo-600" : "text-slate-400"}`} />
-                <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Giao dịch lặp lại</span>
+                <RefreshCw className={`w-4 h-4 ${isRecurring ? "text-accent" : "text-content-muted"}`} />
+                <span className="text-sm font-medium text-content-secondary">Giao dịch lặp lại</span>
               </div>
             </label>
 
             {isRecurring && (
               <div>
-                <label className="block text-xs text-slate-500 dark:text-slate-400 mb-1.5">Chu kỳ lặp lại</label>
+                <label className="block text-xs text-content-muted mb-2">Chu kỳ lặp lại</label>
                 <div className="grid grid-cols-2 gap-2">
                   {(Object.entries(RECURRENCE_LABELS) as [RecurrenceType, string][]).map(([key, label]) => (
                     <button key={key} type="button" onClick={() => setRecurrence(key)}
-                      className={`py-2 rounded-lg text-xs font-medium border transition-colors ${
+                      className={`py-2.5 rounded-xl text-xs font-semibold border transition-all ${
                         recurrence === key
-                          ? "bg-indigo-600 text-white border-indigo-600"
-                          : "bg-white dark:bg-slate-700 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-600 hover:border-indigo-400"
+                          ? "bg-accent text-white border-accent shadow-md shadow-accent/20"
+                          : "bg-surface-primary text-content-secondary border-border hover:border-accent hover:text-accent"
                       }`}
                     >
                       {label}
                     </button>
                   ))}
                 </div>
-                <p className="text-xs text-slate-400 dark:text-slate-500 mt-2">
+                <p className="text-xs text-content-muted mt-2.5">
                   Lần tiếp theo: {calcNextOccurrence(date, recurrence)}
                 </p>
               </div>
             )}
           </div>
 
-          {error && <p className="text-sm text-red-600 bg-red-50 dark:bg-red-900/20 px-4 py-2.5 rounded-lg">{error}</p>}
+          {error && <p className="text-sm text-expense bg-expense-soft px-4 py-3 rounded-xl">{error}</p>}
 
           <div className="flex gap-3 pt-2">
             <button type="button" onClick={onClose}
-              className="flex-1 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+              className="flex-1 py-3 rounded-xl border border-border text-sm font-medium text-content-secondary hover:bg-accent-soft hover:text-accent transition-all"
             >
               Hủy
             </button>
             <button type="submit" disabled={loading}
-              className="flex-1 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-60 text-white text-sm font-medium transition-colors"
+              className="flex-1 py-3 rounded-xl bg-accent hover:bg-accent-hover disabled:opacity-60 text-white text-sm font-semibold transition-all shadow-lg shadow-accent/20"
             >
               {loading ? "Đang lưu..." : transaction ? "Lưu thay đổi" : "Thêm giao dịch"}
             </button>

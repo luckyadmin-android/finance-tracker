@@ -60,12 +60,12 @@ export default function GoalsClient({ initialGoals }: { initialGoals: Goal[] }) 
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between animate-in">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Mục Tiêu Tiết Kiệm</h1>
-          <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">{goals.length} mục tiêu</p>
+          <h1 className="text-3xl font-bold font-display text-content-primary tracking-tight">Mục Tiêu Tiết Kiệm</h1>
+          <p className="text-content-muted text-sm mt-1">{goals.length} mục tiêu</p>
         </div>
-        <button onClick={startAdd} className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-xl text-sm font-medium transition-colors">
+        <button onClick={startAdd} className="flex items-center gap-2 bg-accent hover:bg-accent-hover text-white px-4 py-2.5 rounded-xl text-sm font-semibold transition-all shadow-lg shadow-accent/20 hover:shadow-accent/30">
           <Plus className="w-4 h-4" /> Thêm mục tiêu
         </button>
       </div>
@@ -78,14 +78,14 @@ export default function GoalsClient({ initialGoals }: { initialGoals: Goal[] }) 
       )}
 
       {goals.length === 0 && !showForm ? (
-        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 py-16 text-center">
-          <Target className="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto mb-3" />
-          <p className="text-slate-500 dark:text-slate-400 font-medium">Chưa có mục tiêu nào</p>
-          <p className="text-slate-400 dark:text-slate-500 text-sm mt-1">Tạo mục tiêu đầu tiên để bắt đầu tiết kiệm!</p>
+        <div className="glass-card py-16 text-center animate-in animate-in-delay-1">
+          <Target className="w-12 h-12 text-content-muted mx-auto mb-3 opacity-40" />
+          <p className="text-content-secondary font-medium">Chưa có mục tiêu nào</p>
+          <p className="text-content-muted text-sm mt-1">Tạo mục tiêu đầu tiên để bắt đầu tiết kiệm!</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {goals.map((goal) => (
+          {goals.map((goal, i) => (
             <GoalCard
               key={goal.id} goal={goal}
               onEdit={startEdit} onDelete={handleDelete} onAddAmount={handleAddAmount}

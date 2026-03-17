@@ -14,8 +14,9 @@ export default async function DashboardPage() {
   const now = new Date();
   const firstOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split("T")[0];
   const lastOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split("T")[0];
+  const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 5, 1).toISOString().split("T")[0];
 
-  const [{ data: monthTransactions }, { data: budgetCategories }] = await Promise.all([
+  const [{ data: monthTransactions }, { data: budgetCategories }, { data: allMonthData }] = await Promise.all([
     supabase
       .from("transactions")
       .select("*, category:categories(*)")
@@ -29,20 +30,18 @@ export default async function DashboardPage() {
       .eq("user_id", user!.id)
       .eq("type", "expense")
       .not("budget_limit", "is", null),
+    supabase
+      .from("transactions")
+      .select("type, amount, date")
+      .eq("user_id", user!.id)
+      .gte("date", sixMonthsAgo)
+      .order("date", { ascending: true }),
   ]);
 
   const transactions: Transaction[] = monthTransactions ?? [];
   const totalIncome = transactions.filter((t) => t.type === "income").reduce((sum, t) => sum + t.amount, 0);
   const totalExpense = transactions.filter((t) => t.type === "expense").reduce((sum, t) => sum + t.amount, 0);
   const netBalance = totalIncome - totalExpense;
-
-  const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 5, 1).toISOString().split("T")[0];
-  const { data: allMonthData } = await supabase
-    .from("transactions")
-    .select("type, amount, date")
-    .eq("user_id", user!.id)
-    .gte("date", sixMonthsAgo)
-    .order("date", { ascending: true });
 
   const monthlyMap: Record<string, { income: number; expense: number }> = {};
   (allMonthData ?? []).forEach((t) => {
@@ -90,10 +89,10 @@ export default async function DashboardPage() {
       />
       <DashboardCharts chartData={chartData} categoryData={categoryData} />
       {budgetItems.length > 0 && <BudgetOverview items={budgetItems} />}
-      <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700">
-        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 dark:border-slate-700">
-          <h2 className="font-semibold text-slate-900 dark:text-white">Giao Dịch Gần Đây</h2>
-          <Link href="/transactions" className="flex items-center gap-1 text-sm text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 font-medium">
+      <div className="glass-card animate-in animate-in-delay-4">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-border">
+          <h2 className="font-semibold font-display text-content-primary">Giao Dịch Gần Đây</h2>
+          <Link href="/transactions" className="flex items-center gap-1.5 text-sm text-accent hover:text-accent-hover font-semibold transition-colors">
             Xem tất cả <ArrowRight className="w-4 h-4" />
           </Link>
         </div>

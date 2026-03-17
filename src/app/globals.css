@@ -1,10 +1,48 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Lexend:wght@300;400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  --background: #f8fafc;
-  --foreground: #0f172a;
+  --bg-primary: #f0f4f3;
+  --bg-secondary: #ffffff;
+  --bg-card: rgba(255, 255, 255, 0.85);
+  --text-primary: #0f1f1b;
+  --text-secondary: #3d5a50;
+  --text-muted: #7a9489;
+  --border: rgba(16, 69, 50, 0.08);
+  --accent: #0d9668;
+  --accent-hover: #0a7d56;
+  --accent-soft: rgba(13, 150, 104, 0.08);
+  --income: #d4a017;
+  --income-soft: rgba(212, 160, 23, 0.1);
+  --expense: #e04560;
+  --expense-soft: rgba(224, 69, 96, 0.08);
+  --glass: rgba(255, 255, 255, 0.6);
+  --shadow: 0 1px 3px rgba(16, 69, 50, 0.06), 0 8px 24px rgba(16, 69, 50, 0.04);
+  --shadow-lg: 0 4px 12px rgba(16, 69, 50, 0.08), 0 20px 48px rgba(16, 69, 50, 0.06);
+  --radius: 16px;
+}
+
+.dark {
+  --bg-primary: #0a1410;
+  --bg-secondary: #111f1a;
+  --bg-card: rgba(17, 31, 26, 0.9);
+  --text-primary: #e8f0ec;
+  --text-secondary: #9ab5a8;
+  --text-muted: #5e7d6f;
+  --border: rgba(154, 181, 168, 0.1);
+  --accent: #34d399;
+  --accent-hover: #2cc087;
+  --accent-soft: rgba(52, 211, 153, 0.1);
+  --income: #f0c040;
+  --income-soft: rgba(240, 192, 64, 0.1);
+  --expense: #fb6b85;
+  --expense-soft: rgba(251, 107, 133, 0.1);
+  --glass: rgba(17, 31, 26, 0.6);
+  --shadow: 0 1px 3px rgba(0, 0, 0, 0.2), 0 8px 24px rgba(0, 0, 0, 0.15);
+  --shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.25), 0 20px 48px rgba(0, 0, 0, 0.2);
 }
 
 * {
@@ -12,7 +50,108 @@
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: 'Lexend', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'DM Sans', sans-serif;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--text-muted);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-secondary);
+}
+
+/* Glass card utility */
+.glass-card {
+  background: var(--bg-card);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.glass-card:hover {
+  box-shadow: var(--shadow-lg);
+}
+
+/* Subtle gradient backgrounds */
+.bg-mesh-light {
+  background:
+    radial-gradient(ellipse at 20% 50%, rgba(13, 150, 104, 0.05) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 20%, rgba(212, 160, 23, 0.04) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 80%, rgba(224, 69, 96, 0.03) 0%, transparent 50%),
+    var(--bg-primary);
+}
+
+.dark .bg-mesh-light {
+  background:
+    radial-gradient(ellipse at 20% 50%, rgba(52, 211, 153, 0.04) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 20%, rgba(240, 192, 64, 0.03) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 80%, rgba(251, 107, 133, 0.02) 0%, transparent 50%),
+    var(--bg-primary);
+}
+
+/* Smooth focus ring */
+.focus-ring {
+  @apply focus:outline-none focus:ring-2 focus:ring-[var(--accent)] focus:ring-offset-1;
+}
+
+.dark .focus-ring {
+  @apply focus:ring-offset-[var(--bg-secondary)];
+}
+
+/* Page entrance animation */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-in {
+  animation: fadeInUp 0.4s ease-out both;
+}
+
+.animate-in-delay-1 { animation-delay: 0.05s; }
+.animate-in-delay-2 { animation-delay: 0.1s; }
+.animate-in-delay-3 { animation-delay: 0.15s; }
+.animate-in-delay-4 { animation-delay: 0.2s; }
+
+/* Pulse shimmer for skeleton loading */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--border) 25%,
+    rgba(154, 181, 168, 0.15) 50%,
+    var(--border) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite ease-in-out;
+  border-radius: 8px;
 }

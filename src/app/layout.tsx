@@ -14,7 +14,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <head>
         <script dangerouslySetInnerHTML={{ __html: `try{var t=localStorage.getItem('theme');if(t==='dark'||(!t&&window.matchMedia('(prefers-color-scheme: dark)').matches))document.documentElement.classList.add('dark')}catch(e){}` }} />
       </head>
-      <body className="min-h-screen bg-slate-50 dark:bg-slate-900 transition-colors duration-200">
+      <body className="min-h-screen bg-mesh-light font-body transition-colors duration-300">
         <ThemeProvider><CurrencyProvider>{children}</CurrencyProvider></ThemeProvider>
       </body>
     </html>

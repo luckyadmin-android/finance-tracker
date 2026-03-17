@@ -3,6 +3,7 @@
 import { useState, useMemo, useEffect, useRef } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Transaction, Category, TransactionType } from "@/types";
+import { deleteTransaction } from "@/app/actions/transactions";
 import { RECURRENCE_LABELS, calcNextFutureOccurrence } from "@/lib/utils";
 import { useCurrency } from "@/components/CurrencyProvider";
 import TransactionModal from "@/components/TransactionModal";
@@ -41,24 +42,29 @@ export default function TransactionsClient({ initialTransactions, categories }: 
     if (due.length === 0) return;
 
     (async () => {
-      const newTransactions: Transaction[] = [];
-      for (const t of due) {
+      const insertPayloads = due.map((t) => {
         const occurrenceDate = t.next_occurrence!;
         const nextFuture = calcNextFutureOccurrence(occurrenceDate, t.recurrence!);
+        return {
+          type: t.type, amount: t.amount, description: t.description,
+          category_id: t.category_id, date: occurrenceDate,
+          is_recurring: true, recurrence: t.recurrence, next_occurrence: nextFuture,
+        };
+      });
 
-        const { data: created } = await supabase
+      const dueIds = due.map((t) => t.id);
+      const [{ data: created }] = await Promise.all([
+        supabase
           .from("transactions")
-          .insert({
-            type: t.type, amount: t.amount, description: t.description,
-            category_id: t.category_id, date: occurrenceDate,
-            is_recurring: true, recurrence: t.recurrence, next_occurrence: nextFuture,
-          })
-          .select("*, category:categories(*)")
-          .single();
+          .insert(insertPayloads)
+          .select("*, category:categories(*)"),
+        supabase
+          .from("transactions")
+          .update({ next_occurrence: null })
+          .in("id", dueIds),
+      ]);
 
-        await supabase.from("transactions").update({ next_occurrence: null }).eq("id", t.id);
-        if (created) newTransactions.push(created as Transaction);
-      }
+      const newTransactions: Transaction[] = created ? (created as Transaction[]) : [];
 
       if (newTransactions.length > 0) {
         setTransactions((prev) => {
@@ -132,7 +138,7 @@ export default function TransactionsClient({ initialTransactions, categories }: 
   async function handleDelete(id: string) {
     if (!confirm("Xóa giao dịch này?")) return;
     setDeleting(id);
-    await supabase.from("transactions").delete().eq("id", id);
+    await deleteTransaction(id);
     setTransactions((prev) => prev.filter((t) => t.id !== id));
     setDeleting(null);
   }
@@ -147,21 +153,21 @@ export default function TransactionsClient({ initialTransactions, categories }: 
 
   return (
     <div className="max-w-5xl mx-auto space-y-5">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between animate-in">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Giao Dịch</h1>
-          <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">{transactions.length} giao dịch</p>
+          <h1 className="text-3xl font-bold font-display text-content-primary tracking-tight">Giao Dịch</h1>
+          <p className="text-content-muted text-sm mt-1">{transactions.length} giao dịch</p>
         </div>
         <div className="flex items-center gap-2">
           <button
             onClick={exportCSV}
-            className="flex items-center gap-2 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors"
+            className="flex items-center gap-2 border border-border text-content-secondary hover:bg-accent-soft hover:text-accent px-4 py-2.5 rounded-xl text-sm font-medium transition-all"
           >
             <Download className="w-4 h-4" /> Xuất CSV
           </button>
           <button
             onClick={() => { setEditing(null); setModalOpen(true); }}
-            className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-xl text-sm font-medium transition-colors"
+            className="flex items-center gap-2 bg-accent hover:bg-accent-hover text-white px-4 py-2.5 rounded-xl text-sm font-semibold transition-all shadow-lg shadow-accent/20 hover:shadow-accent/30"
           >
             <Plus className="w-4 h-4" /> Thêm giao dịch
           </button>
@@ -181,14 +187,14 @@ export default function TransactionsClient({ initialTransactions, categories }: 
         onClear={clearFilters}
       />
 
-      <div className="grid grid-cols-2 gap-4">
-        <div className="bg-green-50 dark:bg-green-900/20 rounded-xl px-4 py-3 flex items-center justify-between">
-          <span className="text-sm text-green-700 dark:text-green-400 font-medium">Thu nhập</span>
-          <span className="text-sm font-bold text-green-700 dark:text-green-400">{fmt(totalIncome)}</span>
+      <div className="grid grid-cols-2 gap-4 animate-in animate-in-delay-2">
+        <div className="glass-card px-4 py-3.5 flex items-center justify-between bg-income-soft/50">
+          <span className="text-sm text-income font-medium">Thu nhập</span>
+          <span className="text-sm font-bold text-income">{fmt(totalIncome)}</span>
         </div>
-        <div className="bg-red-50 dark:bg-red-900/20 rounded-xl px-4 py-3 flex items-center justify-between">
-          <span className="text-sm text-red-600 dark:text-red-400 font-medium">Chi tiêu</span>
-          <span className="text-sm font-bold text-red-600 dark:text-red-400">{fmt(totalExpense)}</span>
+        <div className="glass-card px-4 py-3.5 flex items-center justify-between bg-expense-soft/50">
+          <span className="text-sm text-expense font-medium">Chi tiêu</span>
+          <span className="text-sm font-bold text-expense">{fmt(totalExpense)}</span>
         </div>
       </div>
 

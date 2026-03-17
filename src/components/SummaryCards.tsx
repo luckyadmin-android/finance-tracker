@@ -15,45 +15,45 @@ export default function SummaryCards({ totalIncome, totalExpense, netBalance, mo
 
   return (
     <>
-      <div>
-        <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Tổng Quan</h1>
-        <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">{monthLabel}</p>
+      <div className="animate-in">
+        <h1 className="text-3xl font-bold font-display text-content-primary tracking-tight">Tổng Quan</h1>
+        <p className="text-content-muted text-sm mt-1">{monthLabel}</p>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5">
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-sm font-medium text-slate-500 dark:text-slate-400">Thu nhập</span>
-            <div className="w-9 h-9 bg-green-50 dark:bg-green-900/30 rounded-xl flex items-center justify-center">
-              <TrendingUp className="w-5 h-5 text-green-600" />
+        <div className="glass-card p-5 animate-in animate-in-delay-1">
+          <div className="flex items-center justify-between mb-4">
+            <span className="text-xs font-semibold text-content-muted uppercase tracking-wider">Thu nhập</span>
+            <div className="w-10 h-10 bg-income-soft rounded-xl flex items-center justify-center">
+              <TrendingUp className="w-5 h-5 text-income" />
             </div>
           </div>
-          <p className="text-2xl font-bold text-slate-900 dark:text-white">{fmt(totalIncome)}</p>
-          <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">Tháng này</p>
+          <p className="text-2xl font-bold font-display text-content-primary">{fmt(totalIncome)}</p>
+          <p className="text-xs text-content-muted mt-1.5">Tháng này</p>
         </div>
 
-        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5">
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-sm font-medium text-slate-500 dark:text-slate-400">Chi tiêu</span>
-            <div className="w-9 h-9 bg-red-50 dark:bg-red-900/30 rounded-xl flex items-center justify-center">
-              <TrendingDown className="w-5 h-5 text-red-500" />
+        <div className="glass-card p-5 animate-in animate-in-delay-2">
+          <div className="flex items-center justify-between mb-4">
+            <span className="text-xs font-semibold text-content-muted uppercase tracking-wider">Chi tiêu</span>
+            <div className="w-10 h-10 bg-expense-soft rounded-xl flex items-center justify-center">
+              <TrendingDown className="w-5 h-5 text-expense" />
             </div>
           </div>
-          <p className="text-2xl font-bold text-slate-900 dark:text-white">{fmt(totalExpense)}</p>
-          <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">Tháng này</p>
+          <p className="text-2xl font-bold font-display text-content-primary">{fmt(totalExpense)}</p>
+          <p className="text-xs text-content-muted mt-1.5">Tháng này</p>
         </div>
 
-        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5">
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-sm font-medium text-slate-500 dark:text-slate-400">Số dư</span>
-            <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${netBalance >= 0 ? "bg-indigo-50 dark:bg-indigo-900/30" : "bg-orange-50 dark:bg-orange-900/30"}`}>
-              <Wallet className={`w-5 h-5 ${netBalance >= 0 ? "text-indigo-600" : "text-orange-500"}`} />
+        <div className="glass-card p-5 animate-in animate-in-delay-3">
+          <div className="flex items-center justify-between mb-4">
+            <span className="text-xs font-semibold text-content-muted uppercase tracking-wider">Số dư</span>
+            <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${netBalance >= 0 ? "bg-accent-soft" : "bg-expense-soft"}`}>
+              <Wallet className={`w-5 h-5 ${netBalance >= 0 ? "text-accent" : "text-expense"}`} />
             </div>
           </div>
-          <p className={`text-2xl font-bold ${netBalance >= 0 ? "text-slate-900 dark:text-white" : "text-orange-600"}`}>
+          <p className={`text-2xl font-bold font-display ${netBalance >= 0 ? "text-content-primary" : "text-expense"}`}>
             {fmt(netBalance)}
           </p>
-          <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">Thu nhập trừ chi tiêu</p>
+          <p className="text-xs text-content-muted mt-1.5">Thu nhập trừ chi tiêu</p>
         </div>
       </div>
     </>

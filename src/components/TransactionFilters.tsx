@@ -22,7 +22,7 @@ interface Props {
 }
 
 const SELECT_CLASS =
-  "px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500";
+  "px-3 py-2.5 rounded-xl border border-border bg-surface-primary text-content-primary text-sm focus-ring appearance-none cursor-pointer";
 
 export default function TransactionFilters({
   search, filterType, filterCategory, filterMonthNum, filterYear,
@@ -32,14 +32,14 @@ export default function TransactionFilters({
   const hasFilters = search || filterType !== "all" || filterCategory !== "all" || filterMonthNum || filterYear;
 
   return (
-    <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-4 space-y-3">
+    <div className="glass-card p-4 space-y-3 animate-in animate-in-delay-1">
       <div className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-content-muted" />
           <input
             type="text" placeholder="Tìm kiếm theo mô tả hoặc danh mục..." value={search}
             onChange={(e) => onSearchChange(e.target.value)}
-            className="w-full pl-9 pr-4 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-border bg-surface-primary text-content-primary text-sm focus-ring placeholder:text-content-muted"
           />
         </div>
         <select value={filterType} onChange={(e) => onTypeChange(e.target.value as TransactionType | "all")} className={SELECT_CLASS}>
@@ -64,8 +64,8 @@ export default function TransactionFilters({
       </div>
       {hasFilters && (
         <div className="flex items-center justify-between pt-1">
-          <p className="text-xs text-slate-500 dark:text-slate-400">Hiển thị {filteredCount} / {totalCount} giao dịch</p>
-          <button onClick={onClear} className="flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors">
+          <p className="text-xs text-content-muted">Hiển thị {filteredCount} / {totalCount} giao dịch</p>
+          <button onClick={onClear} className="flex items-center gap-1 text-xs text-content-muted hover:text-accent transition-colors font-medium">
             <X className="w-3.5 h-3.5" /> Xóa bộ lọc
           </button>
         </div>

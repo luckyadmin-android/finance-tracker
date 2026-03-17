@@ -10,35 +10,35 @@ export default function RecentTransactions({ transactions }: { transactions: Tra
 
   if (transactions.length === 0) {
     return (
-      <div className="px-5 py-10 text-center text-slate-400 dark:text-slate-500 text-sm">
+      <div className="px-6 py-12 text-center text-content-muted text-sm">
         Chưa có giao dịch tháng này. Thêm giao dịch đầu tiên của bạn!
       </div>
     );
   }
 
   return (
-    <div className="divide-y divide-slate-100 dark:divide-slate-700">
+    <div className="divide-y divide-border">
       {transactions.map((t) => (
-        <div key={t.id} className="flex items-center justify-between px-5 py-3.5">
+        <div key={t.id} className="flex items-center justify-between px-6 py-3.5 hover:bg-accent-soft/50 transition-colors">
           <div className="flex items-center gap-3 min-w-0">
-            <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${t.type === "income" ? "bg-green-50 dark:bg-green-900/30" : "bg-red-50 dark:bg-red-900/30"}`}>
-              {t.type === "income" ? <ArrowUpRight className="w-5 h-5 text-green-600" /> : <ArrowDownRight className="w-5 h-5 text-red-500" />}
+            <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${t.type === "income" ? "bg-income-soft" : "bg-expense-soft"}`}>
+              {t.type === "income" ? <ArrowUpRight className="w-5 h-5 text-income" /> : <ArrowDownRight className="w-5 h-5 text-expense" />}
             </div>
             <div className="min-w-0">
               <div className="flex items-center gap-1.5">
-                <p className="text-sm font-medium text-slate-800 dark:text-slate-200 truncate">{t.description}</p>
+                <p className="text-sm font-medium text-content-primary truncate">{t.description}</p>
                 {t.is_recurring && t.recurrence && (
-                  <span className="flex items-center gap-0.5 text-xs text-indigo-500 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/30 px-1.5 py-0.5 rounded-full flex-shrink-0">
+                  <span className="flex items-center gap-0.5 text-[10px] text-accent bg-accent-soft px-1.5 py-0.5 rounded-full flex-shrink-0 font-semibold">
                     <RefreshCw className="w-2.5 h-2.5" />{RECURRENCE_LABELS[t.recurrence]}
                   </span>
                 )}
               </div>
-              <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">
+              <p className="text-[11px] text-content-muted mt-0.5">
                 {t.category?.name ?? "Không phân loại"} · {formatDate(t.date)}
               </p>
             </div>
           </div>
-          <span className={`text-sm font-semibold ml-4 flex-shrink-0 ${t.type === "income" ? "text-green-600" : "text-red-500"}`}>
+          <span className={`text-sm font-semibold ml-4 flex-shrink-0 ${t.type === "income" ? "text-income" : "text-expense"}`}>
             {t.type === "income" ? "+" : "-"}{fmt(t.amount)}
           </span>
         </div>

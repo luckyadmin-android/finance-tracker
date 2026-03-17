@@ -13,12 +13,12 @@ function amountHint(formatted: string) {
   const n = parseFloat(formatted.replace(/\./g, "")) || 0;
   if (n < 1000) return null;
   return (
-    <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">
+    <p className="text-xs text-content-muted mt-1.5">
       = {n.toLocaleString("vi-VN")}₫
       {n >= 1_000_000_000
-        ? <span className="ml-1 text-indigo-400">({(n / 1_000_000_000).toLocaleString("vi-VN", { maximumFractionDigits: 2 })} tỉ)</span>
+        ? <span className="ml-1 text-accent">({(n / 1_000_000_000).toLocaleString("vi-VN", { maximumFractionDigits: 2 })} tỉ)</span>
         : n >= 1_000_000
-          ? <span className="ml-1 text-indigo-400">({(n / 1_000_000).toLocaleString("vi-VN", { maximumFractionDigits: 2 })} triệu)</span>
+          ? <span className="ml-1 text-accent">({(n / 1_000_000).toLocaleString("vi-VN", { maximumFractionDigits: 2 })} triệu)</span>
           : null}
     </p>
   );
@@ -58,70 +58,71 @@ interface Props {
 }
 
 export default function GoalForm({ form, isEditing, loading, error, onChange, onSubmit, onCancel }: Props) {
+  const inputClass = "w-full px-4 py-3 rounded-xl border border-border bg-surface-primary text-content-primary text-sm focus-ring placeholder:text-content-muted transition-colors";
+  const labelClass = "block text-sm font-medium text-content-secondary mb-2";
+
   return (
-    <div className="bg-white dark:bg-slate-800 rounded-2xl border border-indigo-200 dark:border-indigo-700 p-5">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="font-semibold text-slate-900 dark:text-white">{isEditing ? "Sửa mục tiêu" : "Mục tiêu mới"}</h3>
-        <button onClick={onCancel} className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-400">
+    <div className="glass-card p-6 !border-accent/30 animate-in animate-in-delay-1">
+      <div className="flex items-center justify-between mb-5">
+        <h3 className="font-semibold font-display text-content-primary">{isEditing ? "Sửa mục tiêu" : "Mục tiêu mới"}</h3>
+        <button onClick={onCancel} className="p-1.5 rounded-lg hover:bg-accent-soft text-content-muted transition-colors">
           <X className="w-4 h-4" />
         </button>
       </div>
       <form onSubmit={onSubmit} className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Tên mục tiêu</label>
+          <label className={labelClass}>Tên mục tiêu</label>
           <input type="text" value={form.name} onChange={(e) => onChange({ ...form, name: e.target.value })}
             required maxLength={60} placeholder="vd. Mua xe, Du lịch Nhật Bản..."
-            className="w-full px-4 py-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+            className={inputClass}
           />
         </div>
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Số tiền mục tiêu</label>
+            <label className={labelClass}>Số tiền mục tiêu</label>
             <input type="text" inputMode="numeric" value={form.target_amount}
               onChange={(e) => onChange({ ...form, target_amount: fmtInput(e.target.value) })}
-              required placeholder="0"
-              className="w-full px-4 py-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+              required placeholder="0" className={inputClass}
             />
             {amountHint(form.target_amount)}
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Đã tiết kiệm được</label>
+            <label className={labelClass}>Đã tiết kiệm được</label>
             <input type="text" inputMode="numeric" value={form.current_amount}
               onChange={(e) => onChange({ ...form, current_amount: fmtInput(e.target.value) })}
-              placeholder="0"
-              className="w-full px-4 py-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+              placeholder="0" className={inputClass}
             />
             {amountHint(form.current_amount)}
           </div>
         </div>
         <div>
-          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
-            Hạn chót <span className="text-slate-400 font-normal">(tuỳ chọn)</span>
+          <label className={labelClass}>
+            Hạn chót <span className="text-content-muted font-normal">(tuỳ chọn)</span>
           </label>
           <input type="date" value={form.deadline} onChange={(e) => onChange({ ...form, deadline: e.target.value })}
-            className="w-full px-4 py-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+            className={inputClass}
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Màu sắc</label>
+          <label className={labelClass}>Màu sắc</label>
           <div className="flex flex-wrap gap-2">
             {CATEGORY_COLORS.map((color) => (
               <button key={color} type="button" onClick={() => onChange({ ...form, color })}
-                className="w-8 h-8 rounded-full flex items-center justify-center transition-transform hover:scale-110"
+                className="w-9 h-9 rounded-full flex items-center justify-center transition-all hover:scale-110 hover:shadow-md"
                 style={{ backgroundColor: color }}
               >
-                {form.color === color && <Check className="w-4 h-4 text-white" />}
+                {form.color === color && <Check className="w-4 h-4 text-white drop-shadow" />}
               </button>
             ))}
           </div>
         </div>
-        {error && <p className="text-sm text-red-600 bg-red-50 dark:bg-red-900/20 px-4 py-2.5 rounded-lg">{error}</p>}
+        {error && <p className="text-sm text-expense bg-expense-soft px-4 py-3 rounded-xl">{error}</p>}
         <div className="flex gap-3">
           <button type="button" onClick={onCancel}
-            className="flex-1 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+            className="flex-1 py-3 rounded-xl border border-border text-sm font-medium text-content-secondary hover:bg-accent-soft hover:text-accent transition-all"
           >Hủy</button>
           <button type="submit" disabled={loading}
-            className="flex-1 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-60 text-white text-sm font-medium transition-colors"
+            className="flex-1 py-3 rounded-xl bg-accent hover:bg-accent-hover disabled:opacity-60 text-white text-sm font-semibold transition-all shadow-lg shadow-accent/20"
           >{loading ? "Đang lưu..." : isEditing ? "Lưu thay đổi" : "Tạo mục tiêu"}</button>
         </div>
       </form>
