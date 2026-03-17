@@ -44,6 +44,7 @@ export default function CategoriesClient({ initialCategories }: { initialCategor
   const [form, setForm] = useState<FormState>(DEFAULT_FORM);
   const [editing, setEditing] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [deleting, setDeleting] = useState<string | null>(null);
   const [error, setError] = useState("");
   const { fmt } = useCurrency();
 
@@ -81,8 +82,14 @@ export default function CategoriesClient({ initialCategories }: { initialCategor
 
   async function handleDelete(id: string) {
     if (!confirm("Xóa danh mục này? Các giao dịch liên quan sẽ không được phân loại.")) return;
-    await deleteCategory(id);
-    setCategories((prev) => prev.filter((c) => c.id !== id));
+    setDeleting(id);
+    const result = await deleteCategory(id);
+    if (result.success) {
+      setCategories((prev) => prev.filter((c) => c.id !== id));
+    } else {
+      alert(result.error ?? "Lỗi khi xóa danh mục.");
+    }
+    setDeleting(null);
   }
 
   const inputClass = "w-full px-4 py-3 rounded-xl border border-border bg-surface-primary text-content-primary text-sm focus-ring placeholder:text-content-muted transition-colors";
@@ -112,7 +119,7 @@ export default function CategoriesClient({ initialCategories }: { initialCategor
                 <button onClick={() => startEdit(cat)} className="p-1.5 rounded-lg hover:bg-accent-soft text-content-muted hover:text-accent transition-colors">
                   <Pencil className="w-4 h-4" />
                 </button>
-                <button onClick={() => handleDelete(cat.id)} className="p-1.5 rounded-lg hover:bg-expense-soft text-content-muted hover:text-expense transition-colors">
+                <button onClick={() => handleDelete(cat.id)} disabled={deleting === cat.id} className="p-1.5 rounded-lg hover:bg-expense-soft text-content-muted hover:text-expense transition-colors disabled:opacity-40 disabled:pointer-events-none">
                   <Trash2 className="w-4 h-4" />
                 </button>
               </div>

@@ -19,12 +19,13 @@ function daysUntil(deadline: string): number {
 
 interface Props {
   goal: Goal;
+  deleting?: boolean;
   onEdit: (goal: Goal) => void;
   onDelete: (id: string) => void;
   onAddAmount: (goalId: string, amount: number) => void;
 }
 
-export default function GoalCard({ goal, onEdit, onDelete, onAddAmount }: Props) {
+export default function GoalCard({ goal, deleting, onEdit, onDelete, onAddAmount }: Props) {
   const [addingAmount, setAddingAmount] = useState(false);
   const [addAmount, setAddAmount] = useState("");
   const [addError, setAddError] = useState("");
@@ -78,7 +79,7 @@ export default function GoalCard({ goal, onEdit, onDelete, onAddAmount }: Props)
           <button onClick={() => onEdit(goal)} className="p-1.5 rounded-lg hover:bg-accent-soft text-content-muted hover:text-accent transition-colors">
             <Pencil className="w-4 h-4" />
           </button>
-          <button onClick={() => onDelete(goal.id)} className="p-1.5 rounded-lg hover:bg-expense-soft text-content-muted hover:text-expense transition-colors">
+          <button onClick={() => onDelete(goal.id)} disabled={deleting} className="p-1.5 rounded-lg hover:bg-expense-soft text-content-muted hover:text-expense transition-colors disabled:opacity-40 disabled:pointer-events-none">
             <Trash2 className="w-4 h-4" />
           </button>
         </div>

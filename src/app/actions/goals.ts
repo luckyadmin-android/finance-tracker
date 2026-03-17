@@ -13,7 +13,9 @@ function validateGoalInput(name: string, targetAmount: number, currentAmount: nu
   if (name.trim().length > 60) return "Tên không được quá 60 ký tự.";
   if (isNaN(targetAmount) || targetAmount <= 0) return "Số tiền mục tiêu phải lớn hơn 0.";
   if (targetAmount > 999_999_999_999) return "Số tiền mục tiêu quá lớn.";
+  if (targetAmount % 1000 !== 0) return "Số tiền mục tiêu phải là bội số của 1.000₫.";
   if (isNaN(currentAmount) || currentAmount < 0) return "Số tiền đã tiết kiệm không hợp lệ.";
+  if (currentAmount > 0 && currentAmount % 1000 !== 0) return "Số tiền đã tiết kiệm phải là bội số của 1.000₫.";
   if (currentAmount > targetAmount) return "Số tiền đã tiết kiệm không được vượt quá mục tiêu.";
   if (!CATEGORY_COLORS.includes(color)) return "Màu sắc không hợp lệ.";
   return null;
@@ -50,12 +52,12 @@ export async function upsertGoal(
     const { data, error } = await supabase
       .from("goals").update(payload).eq("id", id).eq("user_id", user.id)
       .select().single();
-    if (error) return { success: false, error: error.message };
+    if (error) { console.error("[upsertGoal] update:", error); return { success: false, error: "Lỗi khi lưu mục tiêu. Vui lòng thử lại." }; }
     return { success: true, data: data as Goal };
   } else {
     const { data, error } = await supabase
-      .from("goals").insert(payload).select().single();
-    if (error) return { success: false, error: error.message };
+      .from("goals").insert({ ...payload, user_id: user.id }).select().single();
+    if (error) { console.error("[upsertGoal] insert:", error); return { success: false, error: "Lỗi khi lưu mục tiêu. Vui lòng thử lại." }; }
     return { success: true, data: data as Goal };
   }
 }
@@ -68,6 +70,7 @@ export async function addGoalAmount(
 ): Promise<GoalActionResult> {
   if (!goalId) return { success: false, error: "ID không hợp lệ." };
   if (isNaN(addAmount) || addAmount <= 0) return { success: false, error: "Số tiền không hợp lệ." };
+  if (addAmount % 1000 !== 0) return { success: false, error: "Số tiền phải là bội số của 1.000₫." };
 
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -77,7 +80,7 @@ export async function addGoalAmount(
   const { data, error } = await supabase
     .from("goals").update({ current_amount: newAmount }).eq("id", goalId).eq("user_id", user.id)
     .select().single();
-  if (error) return { success: false, error: error.message };
+  if (error) { console.error("[addGoalAmount]:", error); return { success: false, error: "Lỗi khi cập nhật mục tiêu. Vui lòng thử lại." }; }
   return { success: true, data: data as Goal };
 }
 
@@ -89,6 +92,6 @@ export async function deleteGoal(id: string): Promise<{ success: boolean; error?
   if (!user) return { success: false, error: "Chưa đăng nhập." };
 
   const { error } = await supabase.from("goals").delete().eq("id", id).eq("user_id", user.id);
-  if (error) return { success: false, error: error.message };
+  if (error) { console.error("[deleteGoal]:", error); return { success: false, error: "Lỗi khi xóa mục tiêu. Vui lòng thử lại." }; }
   return { success: true };
 }

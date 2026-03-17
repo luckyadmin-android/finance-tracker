@@ -14,6 +14,7 @@ function validateCategoryInput(name: string, color: string, budgetLimit: number 
   if (!CATEGORY_COLORS.includes(color)) return "Màu sắc không hợp lệ.";
   if (budgetLimit !== null && (isNaN(budgetLimit) || budgetLimit < 0)) return "Hạn mức ngân sách không hợp lệ.";
   if (budgetLimit !== null && budgetLimit > 999_999_999_999) return "Hạn mức ngân sách quá lớn.";
+  if (budgetLimit !== null && budgetLimit > 0 && budgetLimit % 1000 !== 0) return "Hạn mức ngân sách phải là bội số của 1.000₫.";
   return null;
 }
 
@@ -38,13 +39,13 @@ export async function upsertCategory(
     const { data, error } = await supabase
       .from("categories").update(payload).eq("id", id).eq("user_id", user.id)
       .select().single();
-    if (error) return { success: false, error: error.message };
+    if (error) { console.error("[upsertCategory] update:", error); return { success: false, error: "Lỗi khi lưu danh mục. Vui lòng thử lại." }; }
     return { success: true, data: data as Category };
   } else {
     const { data, error } = await supabase
-      .from("categories").insert({ ...payload, type })
+      .from("categories").insert({ ...payload, type, user_id: user.id })
       .select().single();
-    if (error) return { success: false, error: error.message };
+    if (error) { console.error("[upsertCategory] insert:", error); return { success: false, error: "Lỗi khi lưu danh mục. Vui lòng thử lại." }; }
     return { success: true, data: data as Category };
   }
 }
@@ -57,6 +58,6 @@ export async function deleteCategory(id: string): Promise<{ success: boolean; er
   if (!user) return { success: false, error: "Chưa đăng nhập." };
 
   const { error } = await supabase.from("categories").delete().eq("id", id).eq("user_id", user.id);
-  if (error) return { success: false, error: error.message };
+  if (error) { console.error("[deleteCategory]:", error); return { success: false, error: "Lỗi khi xóa danh mục. Vui lòng thử lại." }; }
   return { success: true };
 }

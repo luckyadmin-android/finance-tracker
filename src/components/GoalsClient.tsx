@@ -15,6 +15,7 @@ export default function GoalsClient({ initialGoals }: { initialGoals: Goal[] }) 
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState<GoalFormState>(DEFAULT_GOAL_FORM);
   const [loading, setLoading] = useState(false);
+  const [deleting, setDeleting] = useState<string | null>(null);
   const [error, setError] = useState("");
 
   function startAdd() {
@@ -49,13 +50,23 @@ export default function GoalsClient({ initialGoals }: { initialGoals: Goal[] }) 
   async function handleAddAmount(goalId: string, amount: number) {
     const goal = goals.find((g) => g.id === goalId)!;
     const result = await addGoalAmount(goalId, goal.current_amount, amount, goal.target_amount);
-    if (result.success) setGoals((prev) => prev.map((g) => (g.id === goalId ? result.data : g)));
+    if (result.success) {
+      setGoals((prev) => prev.map((g) => (g.id === goalId ? result.data : g)));
+    } else {
+      alert(result.error);
+    }
   }
 
   async function handleDelete(id: string) {
     if (!confirm("Xóa mục tiêu này?")) return;
-    await deleteGoal(id);
-    setGoals((prev) => prev.filter((g) => g.id !== id));
+    setDeleting(id);
+    const result = await deleteGoal(id);
+    if (result.success) {
+      setGoals((prev) => prev.filter((g) => g.id !== id));
+    } else {
+      alert(result.error ?? "Lỗi khi xóa mục tiêu.");
+    }
+    setDeleting(null);
   }
 
   return (
@@ -87,7 +98,7 @@ export default function GoalsClient({ initialGoals }: { initialGoals: Goal[] }) 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {goals.map((goal, i) => (
             <GoalCard
-              key={goal.id} goal={goal}
+              key={goal.id} goal={goal} deleting={deleting === goal.id}
               onEdit={startEdit} onDelete={handleDelete} onAddAmount={handleAddAmount}
             />
           ))}

@@ -138,8 +138,12 @@ export default function TransactionsClient({ initialTransactions, categories }: 
   async function handleDelete(id: string) {
     if (!confirm("Xóa giao dịch này?")) return;
     setDeleting(id);
-    await deleteTransaction(id);
-    setTransactions((prev) => prev.filter((t) => t.id !== id));
+    const result = await deleteTransaction(id);
+    if (result.success) {
+      setTransactions((prev) => prev.filter((t) => t.id !== id));
+    } else {
+      alert(result.error ?? "Lỗi khi xóa giao dịch.");
+    }
     setDeleting(null);
   }
 

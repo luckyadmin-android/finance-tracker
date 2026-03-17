@@ -154,3 +154,26 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=...
 - All amount inputs must enforce multiples of 1,000₫ with a visible error and a live VND hint.
 - `CurrencyProvider` only exposes `fmt(amount: number): string` — there is no currency switcher or `setCurrency`.
 - Git remote: `https://github.com/luckyadmin-android/finance-tracker.git`, branch `master`.
+
+## Debugging Log (2026-03-17) — Systematic Debugging Audit
+
+### Method
+Used `superpowers:systematic-debugging` 4-phase process: Root Cause Investigation → Pattern Analysis → Hypothesis Testing → Implementation.
+
+### Issues Found & Fixed
+
+| # | Severity | Issue | Root Cause | Fix | Files Changed |
+|---|----------|-------|-----------|-----|---------------|
+| 1 | CRITICAL | Amounts not validated as multiples of 1,000₫ on server | Server actions only checked `> 0` and `<= MAX_AMOUNT` but never `% 1000` — client-side validation alone is bypassable | Added `% 1000 !== 0` checks in all `validate*()` functions and `addGoalAmount()` | `actions/transactions.ts`, `actions/categories.ts`, `actions/goals.ts` |
+| 2 | CRITICAL | Delete operations update UI without checking server response | `handleDelete()` called server action with `await` but never inspected the return value — UI removed the item even if server returned an error | All 3 delete handlers now check `result.success` before updating state, show `alert()` on failure | `GoalsClient.tsx`, `CategoriesClient.tsx`, `TransactionsClient.tsx` |
+| 3 | CRITICAL | `addGoalAmount` silently fails | `handleAddAmount()` only handled the success path (`if (result.success)`) with no `else` branch — user gets zero feedback on server error | Added `else { alert(result.error) }` branch | `GoalsClient.tsx` |
+| 4 | MEDIUM | Delete buttons clickable during pending delete (double-click risk) | No `disabled` prop on Trash2 buttons in GoalsClient and CategoriesClient (TransactionsClient already had `deleting` state) | Added `deleting` state + `disabled` prop with `opacity-40 pointer-events-none` styles | `GoalsClient.tsx`, `GoalCard.tsx`, `CategoriesClient.tsx` |
+
+### Issues Investigated but NOT Bugs
+| Issue | Finding |
+|-------|---------|
+| `bg-mesh-light` missing `dark:` variant | `.dark .bg-mesh-light` is defined in `globals.css` — dark mode handled via CSS, not Tailwind `dark:` prefix. Not a bug. |
+| Non-null assertions (`!`) on `category` in dashboard `page.tsx` | Guarded by `.filter(t => t.category)` upstream — safe at runtime despite TypeScript hint. Acceptable trade-off. |
+
+### Verification
+- `npm run build` passes cleanly with 0 type errors after all fixes.

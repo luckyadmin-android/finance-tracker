@@ -20,6 +20,7 @@ function validateTransactionInput(formData: {
   if (!["income", "expense"].includes(formData.type)) return "Loại giao dịch không hợp lệ.";
   if (isNaN(formData.amount) || formData.amount <= 0) return "Số tiền phải lớn hơn 0.";
   if (formData.amount > 999_999_999_999) return "Số tiền quá lớn.";
+  if (formData.amount % 1000 !== 0) return "Số tiền phải là bội số của 1.000₫.";
   if (!formData.description.trim()) return "Vui lòng nhập mô tả.";
   if (formData.description.trim().length > 100) return "Mô tả không được quá 100 ký tự.";
   if (!/^\d{4}-\d{2}-\d{2}$/.test(formData.date)) return "Ngày không hợp lệ.";
@@ -61,13 +62,13 @@ export async function upsertTransaction(
     const { data, error } = await supabase
       .from("transactions").update(payload).eq("id", id).eq("user_id", user.id)
       .select("*, category:categories(*)").single();
-    if (error) return { success: false, error: error.message };
+    if (error) { console.error("[upsertTransaction] update:", error); return { success: false, error: "Lỗi khi lưu giao dịch. Vui lòng thử lại." }; }
     return { success: true, data: data as Transaction };
   } else {
     const { data, error } = await supabase
-      .from("transactions").insert(payload)
+      .from("transactions").insert({ ...payload, user_id: user.id })
       .select("*, category:categories(*)").single();
-    if (error) return { success: false, error: error.message };
+    if (error) { console.error("[upsertTransaction] insert:", error); return { success: false, error: "Lỗi khi lưu giao dịch. Vui lòng thử lại." }; }
     return { success: true, data: data as Transaction };
   }
 }
@@ -80,6 +81,6 @@ export async function deleteTransaction(id: string): Promise<{ success: boolean;
   if (!user) return { success: false, error: "Chưa đăng nhập." };
 
   const { error } = await supabase.from("transactions").delete().eq("id", id).eq("user_id", user.id);
-  if (error) return { success: false, error: error.message };
+  if (error) { console.error("[deleteTransaction]:", error); return { success: false, error: "Lỗi khi xóa giao dịch. Vui lòng thử lại." }; }
   return { success: true };
 }
