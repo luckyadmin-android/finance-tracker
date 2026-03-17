@@ -147,11 +147,21 @@ h1, h2, h3, h4, h5, h6 {
 .skeleton {
   background: linear-gradient(
     90deg,
-    var(--border) 25%,
-    rgba(154, 181, 168, 0.15) 50%,
-    var(--border) 75%
+    rgba(13, 150, 104, 0.08) 25%,
+    rgba(13, 150, 104, 0.15) 50%,
+    rgba(13, 150, 104, 0.08) 75%
   );
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite ease-in-out;
   border-radius: 8px;
+}
+
+.dark .skeleton {
+  background: linear-gradient(
+    90deg,
+    rgba(52, 211, 153, 0.08) 25%,
+    rgba(52, 211, 153, 0.16) 50%,
+    rgba(52, 211, 153, 0.08) 75%
+  );
+  background-size: 200% 100%;
 }
